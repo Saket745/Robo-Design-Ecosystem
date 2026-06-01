@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<robot name="antigravity_quadruped">
+
+  <!-- Materials definitions -->
+  <material name="dark_gray">
+    <color rgba="0.15 0.15 0.18 1.0"/>
+  </material>
+  <material name="accent_blue">
+    <color rgba="0.23 0.51 0.96 1.0"/>
+  </material>
+
+  <!-- Base Link (Chassis base) -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="3.5"/>
+      <inertia ixx="0.015" ixy="0" ixz="0" iyy="0.035" iyz="0" izz="0.045"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.45 0.22 0.08"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.45 0.22 0.08"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Front Left Hip Link -->
+  <link name="front_left_hip">
+    <inertial>
+      <origin xyz="0 0.025 0" rpy="0 0 0"/>
+      <mass value="0.25"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0.025 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.025" length="0.05"/>
+      </geometry>
+      <material name="accent_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0.025 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.025" length="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="front_left_hip_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_left_hip"/>
+    <origin xyz="0.18 0.11 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.785" upper="0.785" effort="12.0" velocity="6.0"/>
+  </joint>
+
+  <!-- Front Left Thigh Link -->
+  <link name="front_left_thigh">
+    <inertial>
+      <origin xyz="0 0 -0.075" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.0001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 -0.075" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.035 0.15"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.075" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.035 0.15"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="front_left_thigh_joint" type="revolute">
+    <parent link="front_left_hip"/>
+    <child link="front_left_thigh"/>
+    <origin xyz="0 0.05 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.047" upper="1.047" effort="18.0" velocity="6.0"/>
+  </joint>
+
+  <!-- Front Left Calf Link -->
+  <link name="front_left_calf">
+    <inertial>
+      <origin xyz="0 0 -0.075" rpy="0 0 0"/>
+      <mass value="0.2"/>
+      <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.00005"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 -0.075" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.018 0.022 0.15"/>
+      </geometry>
+      <material name="accent_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.075" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.018 0.022 0.15"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="front_left_calf_joint" type="revolute">
+    <parent link="front_left_thigh"/>
+    <child link="front_left_calf"/>
+    <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="0.0" effort="18.0" velocity="8.0"/>
+  </joint>
+
+  <!-- Gazebo Control Plugins -->
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <parameters>$(find antigravity_quadruped)/config/controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

@@ -1,0 +1,21 @@
+Component,Voltage (V),Continuous Current (A),Peak Current (A),Continuous Power (W),Peak Power (W),Notes
+Jetson Orin Nano,5.0,2.0,3.0,10.0,15.0,Main AI computing core
+ESP32 Microcontroller,3.3,0.15,0.3,0.5,1.0,Low-power sensor polling
+IMU (BMI270),3.3,0.01,0.01,0.033,0.033,SPI communication
+LiDAR (LD19),5.0,0.3,0.5,1.5,2.5,UART interface
+Leg Servo 1 (Hip),12.0,0.5,1.5,6.0,18.0,Front-Left Hip Actuator
+Leg Servo 2 (Thigh),12.0,0.8,2.2,9.6,26.4,Front-Left Thigh Actuator
+Leg Servo 3 (Calf),12.0,0.8,2.2,9.6,26.4,Front-Left Calf Actuator
+Leg Servo 4 (Hip),12.0,0.5,1.5,6.0,18.0,Front-Right Hip Actuator
+Leg Servo 5 (Thigh),12.0,0.8,2.2,9.6,26.4,Front-Right Thigh Actuator
+Leg Servo 6 (Calf),12.0,0.8,2.2,9.6,26.4,Front-Right Calf Actuator
+Leg Servo 7 (Hip),12.0,0.5,1.5,6.0,18.0,Back-Left Hip Actuator
+Leg Servo 8 (Thigh),12.0,0.8,2.2,9.6,26.4,Back-Left Thigh Actuator
+Leg Servo 9 (Calf),12.0,0.8,2.2,9.6,26.4,Back-Left Calf Actuator
+Leg Servo 10 (Hip),12.0,0.5,1.5,6.0,18.0,Back-Right Hip Actuator
+Leg Servo 11 (Thigh),12.0,0.8,2.2,9.6,26.4,Back-Right Thigh Actuator
+Leg Servo 12 (Calf),12.0,0.8,2.2,9.6,26.4,Back-Right Calf Actuator
+Total Logic Power,-,-,-,12.033,18.533,All processors + sensors
+Total Actuator Power,-,-,-,93.6,266.4,12 servos combined
+Total System Power,-,-,-,105.633,284.933,Max continuous + transient limits
+Battery Cell Estimation,14.8 (4S),7.2 (avg),20.0 (peak),-,-,Requires 4S2P Li-Ion (min 6000mAh)

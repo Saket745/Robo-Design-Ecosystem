@@ -1,0 +1,64 @@
+(kicad_pcb (version 20211014) (generator pcbnew)
+
+  (general
+    (thickness 1.6)
+  )
+
+  (paper "A4")
+
+  (layers
+    (0 "F.Cu" signal)
+    (31 "B.Cu" signal)
+    (32 "B.Adhes" user "B.Adhesive")
+    (33 "F.Adhes" user "F.Adhesive")
+    (34 "B.Paste" user)
+    (35 "F.Paste" user)
+    (36 "B.SilkS" user "B.Silkscreen")
+    (37 "F.SilkS" user "F.Silkscreen")
+    (38 "B.Mask" user)
+    (39 "F.Mask" user)
+    (40 "User.Drawings" user)
+    (41 "User.Comments" user)
+    (42 "User.Eco1" user)
+    (43 "User.Eco2" user)
+    (44 "Edge.Cuts" user)
+    (45 "Margin" user)
+    (46 "B.CrtYd" user "B.Courtyard")
+    (47 "F.CrtYd" user "F.Courtyard")
+    (48 "B.Fab" user)
+    (49 "F.Fab" user)
+  )
+
+  (setup
+    (stackup
+      (layer "F.SilkS" (type "Top Silk Screen"))
+      (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))
+      (layer "F.Cu" (type "copper") (thickness 0.035))
+      (layer "dielectric 1" (type "core") (thickness 1.51) (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+      (layer "B.Cu" (type "copper") (thickness 0.035))
+      (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
+      (layer "B.SilkS" (type "Bottom Silk Screen"))
+      (copper_finish "None")
+      (dielectric_constraints no)
+    )
+    (pad_to_mask_clearance 0.05)
+    (pcbplotparams
+      (layerselection 0x00010_ffffffff)
+      (disableapertureselect false)
+      (useroptions 0)
+      (usegerberextensions true)
+      (usegerberattributes true)
+      (usegerberadvancedattributes true)
+      (creategerberjobfile true)
+      (svguseflashtgraphics true)
+    )
+  )
+
+  ;; Design Rules and Net Constraints
+  ;; ==============================================
+  ;; Actuator Trace Width: Min 1.2mm for high current lines (4S battery path)
+  ;; Logic Trace Width: 0.25mm for signal lines (ESP32/Jetson UART, SPI, CAN)
+  ;; Differential Pairs: 0.2mm width, 0.2mm clearance (USB RNDIS, CAN H/L)
+  ;; Single-Point Grounding: Prevent ground loop oscillations near IMU sensor lines
+
+)
