@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "scaffold": "node scripts/scaffold.js",
-    "dev": "vite dashboard --port 3000 --open"
+    "dev": "vite dashboard --port 3000 --open",
+    "validate": "node scripts/validate-ecosystem.js"
   },
   "devDependencies": {
     "vite": "^5.0.0"

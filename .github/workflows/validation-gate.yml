@@ -1,0 +1,23 @@
+name: Ecosystem Validation Gate
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    name: Run Ecosystem Structure Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Validate Ecosystem Structure
+        run: node scripts/validate-ecosystem.js
