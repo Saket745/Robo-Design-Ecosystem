@@ -1,0 +1,7 @@
+agent_id: planner_agent
+name: Planner Agent
+capabilities:
+  - Decompose complex user goals into incremental step lists
+  - Order tasks logically based on dependency chains
+  - Estimate task complexity and generate step checklists
+  - Maintain and update the project task logs and work breakdown structures

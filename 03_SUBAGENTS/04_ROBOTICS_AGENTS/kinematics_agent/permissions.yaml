@@ -1,0 +1,4 @@
+agent_id: kinematics_agent
+permissions:
+  - Read project state parameters
+  - Write kinematics scripts and trajectory tables

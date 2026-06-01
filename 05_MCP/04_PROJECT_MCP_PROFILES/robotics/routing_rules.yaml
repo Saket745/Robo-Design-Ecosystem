@@ -1,0 +1,16 @@
+routing_rules:
+  - file_pattern: "\\.(step|stl|obj|3mf)$"
+    destination_mcp: blender_cad_mcp
+    description: "Route CAD model files to Blender CAD toolchain."
+
+  - file_pattern: "\\.(urdf|sdf|world)$"
+    destination_mcp: gazebo_simulation_mcp
+    description: "Route simulation models and worlds to Gazebo."
+
+  - file_pattern: "\\.(cpp|h|ino)$"
+    destination_mcp: filesystem_mcp
+    description: "Route firmware code to local workspace filesystem."
+
+  - file_pattern: "\\.kicad_pcb$"
+    destination_mcp: filesystem_mcp
+    description: "Route PCB layout designs to local workspace."

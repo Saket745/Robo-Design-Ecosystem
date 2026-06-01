@@ -1,0 +1,5 @@
+agent_id: simulation_agent
+permissions:
+  - Read project state and visual meshes
+  - Write URDF and SDF launch configurations
+  - Run simulation nodes in sandbox

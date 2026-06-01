@@ -1,0 +1,5 @@
+agent_id: planner_agent
+permissions:
+  - Read project specifications and documentation
+  - Write project planning maps and task markdown files
+  - Recommend execution steps to the Orchestrator

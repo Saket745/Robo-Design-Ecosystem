@@ -1,0 +1,14 @@
+critical:
+  - security
+  - robotics_safety
+  - financial_integrity
+high:
+  - architecture
+  - dependencies
+  - execution_logic
+medium:
+  - performance
+  - optimization
+  - formatting
+low:
+  - stylistic_consistency

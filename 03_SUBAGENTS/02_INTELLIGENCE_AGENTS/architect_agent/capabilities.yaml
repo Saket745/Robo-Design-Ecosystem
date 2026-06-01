@@ -1,0 +1,7 @@
+agent_id: architect_agent
+name: Architect Agent
+capabilities:
+  - Design project directory layouts and module maps
+  - Analyze system dependency import trees to detect circular dependencies
+  - Map system communication APIs and data schemas
+  - Formulate architectural plans matching constitutional laws

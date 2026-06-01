@@ -1,0 +1,5 @@
+agent_id: code_engineer_agent
+permissions:
+  - Read and edit code files within workspace directories
+  - Execute build scripts and compiler tools in the sandbox
+  - Request validation tests from the Validation Agent

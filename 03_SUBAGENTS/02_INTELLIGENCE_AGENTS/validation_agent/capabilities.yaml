@@ -1,0 +1,8 @@
+agent_id: validation_agent
+name: Validation Agent
+capabilities:
+  - Enforce compliance with the 6-layer validation chain
+  - Validate inputs and outputs against registered JSON/YAML schemas
+  - Execute code syntax linting and run test suites
+  - Perform security scans for plaintext credentials and path escapes
+  - Verify execution outputs conform to target metrics

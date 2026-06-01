@@ -1,0 +1,7 @@
+agent_id: code_engineer_agent
+name: Code Engineer Agent
+capabilities:
+  - Write modular code in JavaScript, Python, C++, and shell scripts
+  - Refactor legacy structures to adhere to dry-run and modularity rules
+  - Write and run unit/integration test code
+  - Optimize software execution times, logic loops, and database queries

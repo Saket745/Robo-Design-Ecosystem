@@ -1,0 +1,7 @@
+agent_id: documentation_agent
+name: Documentation Agent
+capabilities:
+  - Build and maintain user guides, README files, and architecture overviews
+  - Auto-generate code specifications, API reference tables, and schema mappings
+  - Organize vault link networks using double-bracket Obsidian connections
+  - Keep system changelogs and implementation logs updated

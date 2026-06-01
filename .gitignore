@@ -1,0 +1,87 @@
+# =========================================================
+# ROBO DESIGN ECOSYSTEM — .gitignore
+# =========================================================
+# Security-first gitignore aligned with SYSTEM_DNA.yaml
+# and 07_SECURITY policies.
+# =========================================================
+
+# === SECRETS & CREDENTIALS (CRITICAL — NEVER COMMIT) ===
+17_SECRETS/
+*.env
+*.env.*
+.env.local
+.env.development
+.env.staging
+.env.production
+client_secret*.json
+**/secrets/
+**/encrypted_keys/
+**/oauth/
+**/ssh_keys/
+**/certificates/
+**/recovery_keys/
+**/token_store/
+**/vault/
+
+# === NODE.JS ===
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnp.*
+
+# === RUNTIME STATE & SNAPSHOTS ===
+# State files are machine-generated and transient
+09_EXECUTION_ENGINE/05_STATE_MANAGER/*.json
+13_BACKUPS/01_SNAPSHOTS/*.json
+
+# === SYSTEM LOGS (machine-generated, append-only) ===
+12_SYSTEM_LOGS/**/*.log
+12_SYSTEM_LOGS/**/*.json
+12_SYSTEM_LOGS/01_AUDIT_LOGS/*
+12_SYSTEM_LOGS/01_EXECUTION_LOGS/*
+12_SYSTEM_LOGS/02_AGENT_LOGS/*
+12_SYSTEM_LOGS/02_EXECUTION_LOGS/*
+12_SYSTEM_LOGS/08_AUDIT_LOGS/*
+
+# === OS & EDITOR FILES ===
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.iml
+
+# === BUILD ARTIFACTS ===
+dist/
+build/
+*.tgz
+.cache/
+.parcel-cache/
+
+# === SANDBOX RUNTIME (ephemeral execution zone) ===
+14_SANDBOX/runtime/
+14_SANDBOX/temp/
+14_SANDBOX/*.log
+
+# === MEMORY VECTOR STORES (large binary indexes) ===
+04_MEMORY/*/faiss/
+04_MEMORY/*/chroma/
+04_MEMORY/*/qdrant/
+04_MEMORY/**/*.index
+04_MEMORY/**/*.bin
+
+# === EMBEDDINGS (large generated files) ===
+04_MEMORY/**/embeddings/*.npy
+04_MEMORY/**/embeddings/*.pkl
+
+# === MISC ===
+*.pid
+*.seed
+*.pid.lock
+.npm
+.eslintcache

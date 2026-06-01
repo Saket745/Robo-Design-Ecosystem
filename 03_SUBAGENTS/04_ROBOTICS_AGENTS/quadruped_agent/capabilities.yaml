@@ -1,0 +1,6 @@
+agent_id: quadruped_agent
+name: Quadruped Agent
+capabilities:
+  - Load quadruped robot templates
+  - Configure symmetrical limb structures
+  - Manage mechanical parameter configurations

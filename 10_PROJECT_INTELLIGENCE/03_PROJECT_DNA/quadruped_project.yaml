@@ -1,0 +1,33 @@
+project_name: AntigravityBot
+robot_type: Quadruped
+purpose: Indoor navigation + interactive mobile species
+budget: Medium
+autonomy_level: Semi-autonomous
+mobility: Legged (bio-inspired)
+power_system: Li-ion
+compute_system: Configurable (Jetson/RPi)
+manufacturing: 3D Printed + CNC
+environment: Indoor
+communication: ROS2
+safety_level: Medium
+active: true
+version: 1.0.0
+domains:
+  - robotics_engineering
+  - embedded_systems
+  - kinematics
+  - sensor_fusion
+  - simulation
+skills_required:
+  - cad_design
+  - pcb_design
+  - embedded_systems
+  - robotics_kinematics
+  - sensor_fusion
+  - motor_control
+  - power_systems
+  - computer_vision
+  - simulation
+  - manufacturing
+  - ros2_architecture
+  - bom_procurement

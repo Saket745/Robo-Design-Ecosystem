@@ -1,0 +1,7 @@
+skill_id: ros2_architecture
+version: 1.0.0
+dependencies:
+  - embedded_systems
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python

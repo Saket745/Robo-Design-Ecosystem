@@ -1,0 +1,9 @@
+profile_name: robotics_engineering_profile
+version: 1.0.0
+description: "MCP profile for robotics engineering tasks, enabling CAD tools, ROS2 hooks, and simulation interfaces."
+domain: robotics_engineering
+allowed_environments:
+  - local_sandbox
+  - simulation_host
+security_clearance_required: medium
+allow_network_access: true

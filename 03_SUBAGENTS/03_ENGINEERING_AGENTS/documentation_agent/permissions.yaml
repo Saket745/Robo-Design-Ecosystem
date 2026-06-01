@@ -1,0 +1,5 @@
+agent_id: documentation_agent
+permissions:
+  - Read all repository files and documentation folders
+  - Write markdown files and document assets
+  - Edit comments and docstrings in code blocks

@@ -1,0 +1,8 @@
+skill_id: bom_procurement
+version: 1.0.0
+dependencies:
+  - pcb_design
+  - cad_design
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python

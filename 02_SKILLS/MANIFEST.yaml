@@ -1,0 +1,41 @@
+version: 1.0.0
+last_updated: "2026-05-30"
+author: AG-Core
+
+domains:
+  robotics_engineering:
+    description: "Core robotics physical design, kinematics, control, and dynamics."
+    status: active
+    skills:
+      - cad_design
+      - pcb_design
+      - embedded_systems
+      - robotics_kinematics
+      - sensor_fusion
+      - motor_control
+      - power_systems
+      - computer_vision
+      - simulation
+      - manufacturing
+      - ros2_architecture
+      - bom_procurement
+
+  coordination:
+    description: "Multi-agent coordination and orchestration."
+    status: active
+    skills:
+      - master_orchestrator
+      - agentic_routing
+
+  memory_management:
+    description: "Ecosystem segmented memory kernel."
+    status: active
+    skills:
+      - memory_os
+
+validation_priorities:
+  - security
+  - safety
+  - syntax
+  - schema_compliance
+  - functional_simulation

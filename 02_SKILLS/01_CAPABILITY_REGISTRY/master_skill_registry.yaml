@@ -1,0 +1,144 @@
+skills:
+  - id: cad_design
+    name: "CAD Design"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [cad, mechanics, geometry, blender, step, robot_chassis]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/cad_design/skill.md"
+    dependencies: []
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/cad_design/validation.md"
+    keywords: ["mesh", "3d model", "blender", "step", "urdf", "morphology", "chassis"]
+
+  - id: pcb_design
+    name: "PCB Design"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [electronics, circuit, pcb, schematic, kicad]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/pcb_design/skill.md"
+    dependencies: [power_systems]
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/pcb_design/validation.md"
+    keywords: ["schematic", "routing", "trace", "gerber", "bom", "pinout"]
+
+  - id: embedded_systems
+    name: "Embedded Systems"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [firmware, micro, microcontroller, esp32, cplusplus, arduino]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/embedded_systems/skill.md"
+    dependencies: [motor_control, sensor_fusion]
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/embedded_systems/validation.md"
+    keywords: ["mcu", "gpio", "i2c", "spi", "pwm", "serial", "freertos"]
+
+  - id: robotics_kinematics
+    name: "Robotics Kinematics"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [kinematics, math, inverse_kinematics, forward_kinematics, gait, trajectory]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/robotics_kinematics/skill.md"
+    dependencies: []
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/robotics_kinematics/validation.md"
+    keywords: ["inverse kinematics", "ik", "jacobian", "dh parameters", "gait generation"]
+
+  - id: sensor_fusion
+    name: "Sensor Fusion"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [sensors, imu, lidar, fusion, kalman, odometry]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/sensor_fusion/skill.md"
+    dependencies: []
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/sensor_fusion/validation.md"
+    keywords: ["kalman filter", "imu", "ekf", "madgwick", "pose estimation"]
+
+  - id: motor_control
+    name: "Motor Control"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [motors, actuator, servo, pid, pwm, feedback]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/motor_control/skill.md"
+    dependencies: []
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/motor_control/validation.md"
+    keywords: ["pid", "servo", "odrive", "can bus", "encoder", "current control"]
+
+  - id: power_systems
+    name: "Power Systems"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [power, battery, liion, bms, voltage, current]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/power_systems/skill.md"
+    dependencies: []
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/power_systems/validation.md"
+    keywords: ["battery", "bms", "buck converter", "voltage divider", "step down"]
+
+  - id: computer_vision
+    name: "Computer Vision"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [vision, camera, slam, opencv, object_detection]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/computer_vision/skill.md"
+    dependencies: [sensor_fusion]
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/computer_vision/validation.md"
+    keywords: ["opencv", "yolo", "orb-slam", "visual odometry", "depth camera"]
+
+  - id: simulation
+    name: "Simulation"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [simulation, gazebo, pybullet, ros2, physics]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/simulation/skill.md"
+    dependencies: [cad_design, robotics_kinematics]
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/simulation/validation.md"
+    keywords: ["gazebo", "urdf", "sdf", "pybullet", "joint controller", "simulation"]
+
+  - id: manufacturing
+    name: "Manufacturing"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [manufacturing, 3dprint, cnc, stl, gcode]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/manufacturing/skill.md"
+    dependencies: [cad_design]
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/manufacturing/validation.md"
+    keywords: ["3d print", "sla", "fdm", "cnc", "infills", "pla", "g-code"]
+
+  - id: ros2_architecture
+    name: "ROS2 Architecture"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [ros2, nodes, pubsub, humble, dds]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/ros2_architecture/skill.md"
+    dependencies: [embedded_systems]
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/ros2_architecture/validation.md"
+    keywords: ["topic", "subscriber", "publisher", "service", "action", "colcon"]
+
+  - id: bom_procurement
+    name: "BOM & Procurement"
+    domain: robotics_engineering
+    type: domain_skill
+    tags: [bom, spreadsheet, budget, parts]
+    version: 1.0.0
+    status: active
+    entrypoint: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/bom_procurement/skill.md"
+    dependencies: [pcb_design, cad_design]
+    validation: "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/bom_procurement/validation.md"
+    keywords: ["bill of materials", "bom", "procurement", "components", "digikey", "parts list"]

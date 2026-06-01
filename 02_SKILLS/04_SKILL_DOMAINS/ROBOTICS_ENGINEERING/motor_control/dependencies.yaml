@@ -1,0 +1,7 @@
+skill_id: motor_control
+version: 1.0.0
+dependencies:
+
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python

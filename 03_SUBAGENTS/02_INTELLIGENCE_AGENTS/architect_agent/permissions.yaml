@@ -1,0 +1,5 @@
+agent_id: architect_agent
+permissions:
+  - Read workspace structure and source files
+  - Write architectural specifications and design documents
+  - Recommend skills/manifest changes to the Orchestrator

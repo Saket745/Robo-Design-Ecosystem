@@ -1,0 +1,4 @@
+agent_id: quadruped_agent
+permissions:
+  - Read project state and Project DNA
+  - Write visual chassis and leg templates

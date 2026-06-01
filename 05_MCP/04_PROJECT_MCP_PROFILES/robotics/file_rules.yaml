@@ -1,0 +1,23 @@
+allowed_extensions:
+  - .step
+  - .stl
+  - .urdf
+  - .sdf
+  - .kicad_pcb
+  - .kicad_sch
+  - .cpp
+  - .h
+  - .json
+  - .yaml
+  - .md
+  - .xlsx
+  - .csv
+
+blocked_extensions:
+  - .exe
+  - .bat
+  - .msi
+  - .vbs
+
+max_file_size_mb: 50
+validation_required_on_write: true

@@ -1,0 +1,331 @@
+# =========================================================
+# ANTIGRAVITY SYSTEM DNA
+# =========================================================
+# Purpose:
+# Persistent identity + governance layer for the
+# Antigravity autonomous engineering ecosystem.
+#
+# This file defines:
+# - system philosophy
+# - architectural constraints
+# - orchestration behavior
+# - memory strategy
+# - validation priorities
+# - execution standards
+#
+# This file MUST remain:
+# - stable
+# - deterministic
+# - human-readable
+# - AI-agent readable
+#
+# NEVER STORE:
+# - secrets
+# - API keys
+# - runtime states
+# - temporary memory
+# - project-specific execution data
+# =========================================================
+
+system:
+  name: Antigravity
+  codename: AG-Core
+  version: 1.0.0
+  classification: autonomous_engineering_infrastructure
+  environment: local-first
+  workspace_type: persistent_ai_engineering_ecosystem
+
+identity:
+  philosophy:
+    - modular_engineering
+    - deterministic_execution
+    - validation_first
+    - spec_driven_development
+    - scalable_architecture
+    - reusable_abstractions
+    - security_conscious_design
+    - context_preservation
+    - long_term_maintainability
+
+  prohibited_patterns:
+    - monolithic_architecture
+    - uncontrolled_automation
+    - hidden_state_mutation
+    - duplicated_logic
+    - circular_dependencies
+    - unsafe_secret_storage
+    - unvalidated_execution
+    - unrestricted_agent_access
+    - context_pollution
+
+architecture:
+  style: modular_layered
+  orchestration_model: multi_agent
+  execution_model: deterministic
+  dependency_strategy: explicit_mapping
+  communication_protocol: schema_based
+  memory_strategy: segmented
+  validation_strategy: layered_validation
+  integration_strategy: isolated_connectors
+  documentation_mode: ai_and_human_readable
+
+core_priorities:
+  priority_order:
+    - reliability
+    - determinism
+    - validation
+    - maintainability
+    - modularity
+    - security
+    - scalability
+    - observability
+    - optimization
+    - intelligence
+
+workspace:
+  root_structure:
+    - 00_CORE_BRAIN
+    - 01_GLOBAL_RULES
+    - 02_SKILLS
+    - 03_SUBAGENTS
+    - 04_MEMORY
+    - 05_MCP
+    - 06_AUTOMATION
+    - 07_SECURITY
+    - 08_VALIDATION
+    - 09_EXECUTION_ENGINE
+    - 10_PROJECT_INTELLIGENCE
+    - 11_KNOWLEDGE_GRAPH
+    - 12_SYSTEM_LOGS
+    - 13_BACKUPS
+    - 14_SANDBOX
+    - 15_RECOVERY
+    - 16_CONFIG
+    - 17_SECRETS
+
+  immutable_zones:
+    - 00_CORE_BRAIN
+    - 01_GLOBAL_RULES
+    - 07_SECURITY
+    - SYSTEM_DNA.yaml
+
+  sandbox_required_for:
+    - experimental_agents
+    - external_mcp
+    - autonomous_execution
+    - unsafe_workflows
+    - unverified_integrations
+
+orchestration:
+  agent_mode: specialized_subagents
+  orchestration_policy: centralized_coordination
+
+  subagent_constraints:
+    isolated_execution: true
+    domain_restriction: true
+    unrestricted_filesystem_access: false
+    unrestricted_network_access: false
+    self_modification_allowed: false
+
+  execution_rules:
+    validation_before_execution: true
+    rollback_on_failure: true
+    dependency_check_required: true
+    architecture_review_required: true
+
+memory:
+  segmentation:
+    enabled: true
+
+    layers:
+      - global_memory
+      - project_memory
+      - reusable_patterns
+      - preference_learning
+      - vector_memory
+      - architecture_memory
+
+  context_rules:
+    project_isolation_required: true
+    duplicate_detection_enabled: true
+    semantic_indexing_enabled: true
+    memory_cleanup_enabled: true
+
+  prohibited:
+    - unrestricted_context_merging
+    - raw_conversation_dumping
+    - duplicate_memory_storage
+    - cross_project_contamination
+
+skills:
+  philosophy:
+    - reusable
+    - modular
+    - validation_aware
+    - dependency_explicit
+    - deterministic
+
+  structure_requirements:
+    required_files:
+      - skill.md
+      - validation.md
+      - dependencies.yaml
+
+    recommended_directories:
+      - templates
+      - examples
+      - workflows
+      - schemas
+
+  restrictions:
+    monolithic_skills_prohibited: true
+    undocumented_dependencies_prohibited: true
+
+subagents:
+  architecture:
+    specialization_required: true
+    execution_boundaries_required: true
+    shared_memory_forbidden: false
+    unrestricted_permissions_forbidden: true
+
+  required_agent_types:
+    - planner_agent
+    - architect_agent
+    - validation_agent
+    - memory_agent
+    - documentation_agent
+    - optimization_agent
+
+validation:
+  mandatory: true
+
+  layers:
+    - structural_validation
+    - dependency_validation
+    - architecture_validation
+    - security_validation
+    - execution_validation
+    - recovery_validation
+
+  policies:
+    execution_without_validation: false
+    unsafe_automation_allowed: false
+    production_deployment_without_review: false
+
+security:
+  model: zero_trust_local
+
+  required:
+    - full_disk_encryption
+    - secure_boot
+    - windows_hello
+    - tpm_protection
+    - encrypted_secrets
+    - audit_logging
+    - sandbox_execution
+
+  secret_management:
+    plaintext_storage_allowed: false
+    runtime_injection_required: true
+    environment_variable_support: true
+    encrypted_vault_recommended: true
+
+  restrictions:
+    unrestricted_agent_permissions: false
+    unrestricted_secret_access: false
+    direct_core_modification: false
+
+automation:
+  philosophy:
+    - controlled_automation
+    - observable_execution
+    - rollback_capable
+    - validation_driven
+
+  restrictions:
+    self_replication_forbidden: true
+    unrestricted_system_modification: false
+    unsandboxed_execution: false
+
+obsidian:
+  integration_enabled: true
+
+  structure:
+    backlinking_required: true
+    semantic_tagging_required: true
+    ai_readable_markdown_required: true
+    graph_organization_enabled: true
+
+  conventions:
+    link_style: wikilinks
+    markdown_standard: github_flavored
+    folder_structure_enforced: true
+
+knowledge_graph:
+  enabled: true
+
+  relationship_types:
+    - dependency
+    - architecture
+    - workflow
+    - project_relation
+    - skill_relation
+    - memory_relation
+
+logging:
+  audit_logging_enabled: true
+  execution_logging_enabled: true
+  security_logging_enabled: true
+  recovery_logging_enabled: true
+
+backups:
+  enabled: true
+
+  strategy:
+    daily_snapshot: true
+    weekly_archive: true
+    rollback_points: true
+    immutable_backup_recommended: true
+
+recovery:
+  rollback_supported: true
+  integrity_checks_required: true
+  corruption_detection_enabled: true
+
+development:
+  methodology:
+    - requirements_first
+    - architecture_before_implementation
+    - validation_before_integration
+    - documentation_before_scaling
+
+  coding_principles:
+    - explicit_over_implicit
+    - composition_over_monoliths
+    - modularity_over_shortcuts
+    - maintainability_over_hype
+
+future_expansion:
+  supported_domains:
+    - robotics
+    - ai_systems
+    - ecommerce
+    - logistics
+    - insurance
+    - healthcare
+    - recommendation_engines
+    - autonomous_agents
+    - simulation_systems
+
+final_directive:
+  primary_goal: >
+    Build a reliable, modular, secure, scalable,
+    self-improving autonomous engineering ecosystem
+    capable of supporting long-term multi-domain
+    intelligent project development.
+
+  enforcement:
+    architecture_consistency_required: true
+    deterministic_behavior_required: true
+    validation_first_required: true
+    maintainability_required: true

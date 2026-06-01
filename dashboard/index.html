@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity Autonomous Robotics Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="logo-icon">▲</span>
+        <h1>ANTIGRAVITY</h1>
+      </div>
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="overview">
+          <span class="nav-icon">📊</span> Overview
+        </button>
+        <button class="nav-item" data-tab="project-dna">
+          <span class="nav-icon">🧬</span> Project DNA
+        </button>
+        <button class="nav-item" data-tab="skills">
+          <span class="nav-icon">🛠️</span> Skill Registry
+        </button>
+        <button class="nav-item" data-tab="execution">
+          <span class="nav-icon">⚡</span> Execution Monitor
+        </button>
+        <button class="nav-item" data-tab="search">
+          <span class="nav-icon">🔍</span> Search Engine
+        </button>
+        <button class="nav-item" data-tab="logs">
+          <span class="nav-icon">📋</span> System Logs
+        </button>
+      </nav>
+      <div class="system-status">
+        <div class="status-indicator online"></div>
+        <span>AG-Core v1.0.0</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="page-title">
+          <h2 id="current-tab-title">Overview Dashboard</h2>
+          <p id="current-tab-subtitle">Real-time status of the autonomous engineering ecosystem.</p>
+        </div>
+        <div class="header-actions">
+          <div class="active-project-badge">
+            <span class="badge-dot"></span>
+            Active: <strong id="active-project-name">AntigravityBot</strong>
+          </div>
+        </div>
+      </header>
+
+      <!-- Tabs Container -->
+      <div class="tab-pane active" id="tab-overview">
+        <!-- Overview Grid -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h3>System Status</h3>
+            <div class="metric-value">OPERATIONAL</div>
+            <p>Execution Engine: Idle</p>
+          </div>
+          <div class="metric-card">
+            <h3>Active Skills</h3>
+            <div class="metric-value" id="skills-count">12</div>
+            <p>Loaded from Registry</p>
+          </div>
+          <div class="metric-card">
+            <h3>Completion Rate</h3>
+            <div class="metric-value" id="completion-value">75%</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="completion-progress" style="width: 75%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-sections">
+          <div class="section-card main-section">
+            <h3>Robot Project Progress</h3>
+            <div class="progress-list" id="progress-list-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+          <div class="section-card side-section">
+            <h3>Ecosystem Health</h3>
+            <div class="health-checks">
+              <div class="health-item">
+                <span class="health-status pass">✓</span>
+                <div class="health-info">
+                  <h4>SYSTEM_DNA.yaml</h4>
+                  <p>Governance verification passed.</p>
+                </div>
+              </div>
+              <div class="health-item">
+                <span class="health-status pass">✓</span>
+                <div class="health-info">
+                  <h4>SYSTEM_CONSTITUTION.md</h4>
+                  <p>Ecosystem alignment verified.</p>
+                </div>
+              </div>
+              <div class="health-item">
+                <span class="health-status pass">✓</span>
+                <div class="health-info">
+                  <h4>RECOVERY_MASTER.yaml</h4>
+                  <p>Restore manifest verified.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-project-dna">
+        <div class="section-card full-width">
+          <h3>Active Project DNA Configuration</h3>
+          <p class="description">Defines the permanent hardware, software, and physical constraints of the active model.</p>
+          <div class="dna-grid" id="dna-grid-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-skills">
+        <div class="skills-explorer">
+          <div class="skills-list-panel">
+            <h3>Robotics Capabilities</h3>
+            <div class="skills-grid" id="skills-grid-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+          <div class="skill-detail-panel" id="skill-detail-container">
+            <div class="empty-state">
+              <span>🛠️</span>
+              <p>Select a skill from the registry to view its operational contract and constraints.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-execution">
+        <div class="execution-layout">
+          <div class="section-card execution-flow">
+            <h3>DAG Execution Pipeline</h3>
+            <p class="description">Visual sequence of task scheduling determined by the topological sort.</p>
+            <div class="dag-visualizer" id="dag-steps-container">
+              <!-- Dynamically populated -->
+            </div>
+            <div class="execution-actions">
+              <button class="btn btn-primary" id="btn-trigger-pipeline">Trigger Pipeline Execution</button>
+            </div>
+          </div>
+          <div class="section-card execution-output">
+            <h3>Console Outputs</h3>
+            <div class="console-box" id="console-output-container">
+              <span class="console-line system">[System] Ready for pipeline execution.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-search">
+        <div class="section-card full-width">
+          <h3>Ecosystem Semantic Search Engine</h3>
+          <p class="description">Query the capability registry using natural language to resolve intent and dependencies.</p>
+          <div class="search-form">
+            <input type="text" id="search-input" placeholder="e.g. I need to design kinematics trajectories for a leg segment..." class="search-input-field">
+            <button class="btn btn-primary" id="btn-search-query">Search</button>
+          </div>
+          <div class="search-results-container" id="search-results-output">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-logs">
+        <div class="section-card full-width">
+          <div class="logs-header">
+            <h3>Observability Logs</h3>
+            <div class="filter-controls">
+              <input type="text" id="log-trace-filter" placeholder="Filter by Trace ID..." class="filter-input">
+            </div>
+          </div>
+          <div class="logs-container" id="logs-list-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

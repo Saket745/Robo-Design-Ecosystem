@@ -1,0 +1,7 @@
+skill_id: manufacturing
+version: 1.0.0
+dependencies:
+  - cad_design
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python

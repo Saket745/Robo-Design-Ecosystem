@@ -1,0 +1,6 @@
+agent_id: simulation_agent
+name: Simulation Agent
+capabilities:
+  - Construct robot URDF and SDF descriptions
+  - Load virtual obstacle worlds and friction environments
+  - Run closed-loop control simulation checks

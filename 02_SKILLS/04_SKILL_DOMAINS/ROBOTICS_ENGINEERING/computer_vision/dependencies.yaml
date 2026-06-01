@@ -1,0 +1,7 @@
+skill_id: computer_vision
+version: 1.0.0
+dependencies:
+  - sensor_fusion
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python

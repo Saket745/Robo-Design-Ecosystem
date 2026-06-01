@@ -1,0 +1,8 @@
+skill_id: embedded_systems
+version: 1.0.0
+dependencies:
+  - motor_control
+  - sensor_fusion
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python

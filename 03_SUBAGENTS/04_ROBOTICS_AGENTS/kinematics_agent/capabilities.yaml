@@ -1,0 +1,6 @@
+agent_id: kinematics_agent
+name: Kinematics Agent
+capabilities:
+  - Solve 3-DOF and 12-DOF inverse kinematics
+  - Generate walking, trotting, and bounding gait profiles
+  - Compute joint velocity limits and Jacobian matrices

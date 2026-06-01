@@ -1,0 +1,5 @@
+agent_id: validation_agent
+permissions:
+  - Read all source files, schemas, and logs
+  - Execute sandboxed test commands and linters
+  - Recommend execution denial or approve state commits

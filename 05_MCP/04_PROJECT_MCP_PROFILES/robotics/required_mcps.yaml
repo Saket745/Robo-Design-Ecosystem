@@ -1,0 +1,23 @@
+required_servers:
+  - id: filesystem_mcp
+    type: local_filesystem
+    permissions:
+      - read_write
+    paths:
+      - "antigravity-platform/04_MEMORY/02_PROJECT_MEMORY/robotics/quadruped_project"
+      - "antigravity-platform/10_PROJECT_INTELLIGENCE/02_ACTIVE_PROJECTS"
+
+  - id: blender_cad_mcp
+    type: cad_mesh_generator
+    permissions:
+      - execute_scripts
+    tools:
+      - blender
+
+  - id: gazebo_simulation_mcp
+    type: simulation_orchestrator
+    permissions:
+      - run_physics_sim
+    tools:
+      - gazebo
+      - ros2

@@ -1,0 +1,7 @@
+skill_id: pcb_design
+version: 1.0.0
+dependencies:
+  - power_systems
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python

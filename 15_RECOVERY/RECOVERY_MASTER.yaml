@@ -1,0 +1,35 @@
+system_name: Antigravity
+recovery_mode:
+  type: selective
+  dry_run: true
+  rollback_enabled: true
+restore_targets:
+  - 00_CORE_BRAIN
+  - 04_MEMORY
+  - 09_EXECUTION_ENGINE
+exclude:
+  - cache
+  - temp
+  - experimental
+priority_order:
+  - manifests
+  - memory
+  - vector_index
+  - agents
+  - execution_engine
+integrity:
+  verify_hashes: true
+  repair_corruption: true
+  regenerate_missing_metadata: true
+ai_context:
+  restore_memory_links: true
+  rebuild_semantic_graph: true
+  hallucination_scan: true
+obsidian:
+  relink_notes: true
+  regenerate_graph: true
+rollback:
+  create_checkpoint_before_restore: true
+logging:
+  detailed_logs: true
+  audit_mode: true

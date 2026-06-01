@@ -1,0 +1,19 @@
+{
+  "name": "antigravity-platform",
+  "version": "1.0.0",
+  "description": "Antigravity Autonomous Robotics Ecosystem Platform",
+  "private": true,
+  "workspaces": [
+    "scripts",
+    "dashboard",
+    "engine"
+  ],
+  "scripts": {
+    "scaffold": "node scripts/scaffold.js",
+    "dev": "vite dashboard --port 3000 --open"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+
+}

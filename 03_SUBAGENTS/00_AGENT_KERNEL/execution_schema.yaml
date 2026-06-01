@@ -1,0 +1,31 @@
+execution_schema:
+  type: object
+  required:
+    - trace_id
+    - agent_id
+    - command
+    - arguments
+  properties:
+    trace_id:
+      type: string
+      pattern: "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$"
+    agent_id:
+      type: string
+    command:
+      type: string
+      enum:
+        - load_skills
+        - run_kinematics
+        - generate_bom
+        - validate_spec
+        - export_cad
+        - update_state
+    arguments:
+      type: object
+      additionalProperties: true
+    environment_variables:
+      type: object
+      additionalProperties: true
+    sandbox:
+      type: boolean
+      default: true

@@ -1,0 +1,8 @@
+skill_id: simulation
+version: 1.0.0
+dependencies:
+  - cad_design
+  - robotics_kinematics
+recommended_extensions:
+  - ms-vscode.cpptools
+  - python
