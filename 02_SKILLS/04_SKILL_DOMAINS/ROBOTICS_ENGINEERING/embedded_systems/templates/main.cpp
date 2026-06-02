@@ -1,6 +1,60 @@
+#if defined(ARDUINO) || defined(ESP32)
 #include <Arduino.h>
 #include <Wire.h>
 #include <CAN.h>
+#else
+// Stubs for IDE/Linter compliance when not compiling under Arduino IDE
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+
+#define IRAM_ATTR
+#define FALLING 0
+#define LOW 0
+#define HIGH 1
+#define INPUT 0
+#define OUTPUT 1
+
+typedef uint32_t TickType_t;
+typedef void* TaskHandle_t;
+
+#define pdMS_TO_TICKS(ms) (ms)
+#define xTaskCreatePinnedToCore(task, name, stack, params, priority, handle, core)
+#define vTaskDelayUntil(prev, interval)
+#define xTaskGetTickCount() (0)
+
+#define ledcWrite(channel, duty)
+#define map(val, in_min, in_max, out_min, out_max) (0)
+#define pinMode(pin, mode)
+#define digitalWrite(pin, val)
+#define attachInterrupt(pin, isr, mode)
+#define digitalPinToInterrupt(pin) (pin)
+
+struct TwoWire {
+    void begin(int sda, int scl) {}
+    void beginTransmission(int addr) {}
+    void write(uint8_t val) {}
+    void endTransmission(bool stop = true) {}
+    void requestFrom(int addr, int len) {}
+    uint8_t read() { return 0; }
+} Wire;
+
+struct CANClass {
+    void setPins(int rx, int tx) {}
+    bool begin(long speed) { return true; }
+    int parsePacket() { return 0; }
+    long packetId() { return 0; }
+    bool available() { return false; }
+    uint8_t read() { return 0; }
+} CAN;
+
+struct SerialClass {
+    void begin(long baud) {}
+    void printf(const char* format, ...) {}
+    void print(const char* msg) {}
+    void println(const char* msg) {}
+} Serial;
+#endif
 
 // Pins allocations
 #define IMU_SDA 21

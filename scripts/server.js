@@ -29,10 +29,10 @@ const MIME_TYPES = {
 function serveStatic(reqPath, res) {
   let filePath = path.join(dashboardDir, reqPath === '/' ? 'index.html' : reqPath);
   
-  // Security path check (prevent directory traversal)
   const resolved = path.normalize(path.resolve(filePath));
-  const resolvedDashboard = path.normalize(dashboardDir);
-  if (!resolved.startsWith(resolvedDashboard)) {
+  const resolvedDashboard = path.normalize(path.resolve(dashboardDir));
+  const safeDashboard = resolvedDashboard.endsWith(path.sep) ? resolvedDashboard : resolvedDashboard + path.sep;
+  if (!resolved.startsWith(safeDashboard) && resolved !== resolvedDashboard) {
     res.writeHead(403, { 'Content-Type': 'text/plain' });
     res.end('403 Forbidden: Path traversal attempt blocked.');
     return;
@@ -125,8 +125,9 @@ const server = http.createServer(async (req, res) => {
       
       // Path traversal security check
       const resolvedSkillDir = path.normalize(path.resolve(skillDir));
-      const resolvedBase = path.normalize(skillsBaseDir);
-      if (!resolvedSkillDir.startsWith(resolvedBase)) {
+      const resolvedBase = path.normalize(path.resolve(skillsBaseDir));
+      const safeBase = resolvedBase.endsWith(path.sep) ? resolvedBase : resolvedBase + path.sep;
+      if (!resolvedSkillDir.startsWith(safeBase) && resolvedSkillDir !== resolvedBase) {
         res.writeHead(403, { 'Content-Type': 'text/plain' });
         res.end('403 Forbidden: Path traversal attempt blocked.');
         return;

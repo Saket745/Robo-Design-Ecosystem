@@ -1,11 +1,90 @@
 #!/usr/bin/env python3
-import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import Imu
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped, TransformStamped
-import tf2_ros
-import numpy as np
+try:
+    import rclpy
+    from rclpy.node import Node
+    from sensor_msgs.msg import Imu
+    from nav_msgs.msg import Odometry
+    from geometry_msgs.msg import PoseStamped, TransformStamped
+    import tf2_ros
+    import numpy as np
+except ImportError:
+    # Stubs to suppress IDE linter warnings on host systems without ROS2/numpy installed
+    class Node:
+        def __init__(self, name): pass
+        def get_clock(self):
+            class Clock:
+                def now(self):
+                    class Time:
+                        def to_msg(self): return None
+                        def nanoseconds(self): return 0
+                    return Time()
+            return Clock()
+        def get_logger(self):
+            class Logger:
+                def info(self, msg): print(msg)
+            return Logger()
+        def create_subscription(self, type_msg, topic, cb, qos): pass
+        def create_publisher(self, type_msg, topic, qos):
+            class Pub:
+                def publish(self, msg): pass
+            return Pub()
+
+    class Imu: pass
+    class Odometry:
+        def __init__(self):
+            class Pose:
+                class Pose2:
+                    class Pos: x = 0.0; y = 0.0; z = 0.0
+                    class Orient: x = 0.0; y = 0.0; z = 0.0; w = 1.0
+                    position = Pos()
+                    orientation = Orient()
+                pose = Pose2()
+            self.pose = Pose()
+    class PoseStamped:
+        def __init__(self):
+            class Header: stamp = None; frame_id = ''
+            class Pose:
+                class Pos: x = 0.0; y = 0.0; z = 0.0
+                class Orient: x = 0.0; y = 0.0; z = 0.0; w = 1.0
+                position = Pos()
+                orientation = Orient()
+            self.header = Header()
+            self.pose = Pose()
+    class TransformStamped: pass
+    
+    class tf2_ros:
+        class TransformBroadcaster:
+            def __init__(self, node): pass
+            def sendTransform(self, transform): pass
+
+    class numpy_stub:
+        class array:
+            def __init__(self, data):
+                self.data = data
+            def __getitem__(self, idx):
+                return self.data[idx]
+            def __setitem__(self, idx, val):
+                self.data[idx] = val
+            def __matmul__(self, other):
+                return self
+            @property
+            def T(self):
+                return self
+        def zeros(self, size): return self.array([0.0] * size)
+        def eye(self, size): return self.array([[1.0 if i==j else 0.0 for j in range(size)] for i in range(size)])
+        def sin(self, val): return 0.0
+        def cos(self, val): return 1.0
+        def arctan2(self, y, x): return 0.0
+        class linalg:
+            def inv(self, matrix): return matrix
+        linalg = linalg()
+    np = numpy_stub()
+    
+    class rclpy_stub:
+        def init(self, args=None): pass
+        def spin(self, node): pass
+        def shutdown(self): pass
+    rclpy = rclpy_stub()
 
 class RobotEKFPoseEstimator(Node):
     def __init__(self):

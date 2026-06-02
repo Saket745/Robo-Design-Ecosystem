@@ -430,8 +430,9 @@ const skillsData = {
 
 function validatePath(targetPath) {
   const resolved = path.normalize(path.resolve(targetPath));
-  const resolvedRoot = path.normalize(root);
-  if (!resolved.startsWith(resolvedRoot + path.sep) && resolved !== resolvedRoot) {
+  const resolvedRoot = path.normalize(path.resolve(root));
+  const safeRoot = resolvedRoot.endsWith(path.sep) ? resolvedRoot : resolvedRoot + path.sep;
+  if (!resolved.startsWith(safeRoot) && resolved !== resolvedRoot) {
     throw new Error(`Security Error: Path '${resolved}' is outside allowed root '${resolvedRoot}'.`);
   }
   return resolved;
