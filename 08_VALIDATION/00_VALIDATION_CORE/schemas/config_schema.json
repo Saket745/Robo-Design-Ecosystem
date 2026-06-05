@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Workspace Configuration Schema",
+  "type": "object",
+  "properties": {
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "active_environment": { "type": "string" }
+      },
+      "required": ["name", "version", "active_environment"]
+    },
+    "paths": {
+      "type": "object",
+      "properties": {
+        "root": { "type": "string" },
+        "modules": { "type": "object" },
+        "projects": { "type": "string" },
+        "dashboard": { "type": "string" },
+        "scripts": { "type": "string" }
+      },
+      "required": ["root", "modules", "projects", "dashboard", "scripts"]
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "memory_segmentation": { "type": "boolean" },
+        "validation_gate": { "type": "boolean" },
+        "automatic_backups": { "type": "boolean" },
+        "obsidian_integration": { "type": "boolean" },
+        "realtime_logs": { "type": "boolean" },
+        "sandbox_execution": { "type": "boolean" }
+      }
+    },
+    "server": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer" },
+        "ssl": { "type": "boolean" }
+      },
+      "required": ["host", "port", "ssl"]
+    },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "level": { "type": "string" },
+        "rotate_daily": { "type": "boolean" },
+        "max_files": { "type": "integer" }
+      },
+      "required": ["level", "rotate_daily", "max_files"]
+    }
+  },
+  "required": ["workspace", "paths", "server", "logging"]
+}

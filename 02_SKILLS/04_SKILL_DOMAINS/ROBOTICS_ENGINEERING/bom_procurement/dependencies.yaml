@@ -1,5 +1,16 @@
 skill_id: bom_procurement
 version: 1.0.0
+runtime: python
+permissions:
+  filesystem:
+    read:
+      - sandbox/
+    write:
+      - sandbox/
+  network: false
+packages:
+  npm: []
+  python: []
 dependencies:
   - pcb_design
   - cad_design

@@ -9,6 +9,8 @@
 17_SECRETS/
 *.env
 *.env.*
+!.env.example
+!16_CONFIG/development.env
 .env.local
 .env.development
 .env.staging

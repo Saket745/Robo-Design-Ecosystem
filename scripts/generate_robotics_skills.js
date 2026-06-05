@@ -520,6 +520,17 @@ ${skill.deliverables.map(dl => `  - [ ] \`templates/${dl}\` exists and matches s
   // 3. Write dependencies.yaml
   const depsYamlContent = `skill_id: ${id}
 version: 1.0.0
+runtime: python
+permissions:
+  filesystem:
+    read:
+      - sandbox/
+    write:
+      - sandbox/
+  network: false
+packages:
+  npm: []
+  python: []
 dependencies:
 ${skill.dependencies.map(d => `  - ${d}`).join('\n')}
 recommended_extensions:

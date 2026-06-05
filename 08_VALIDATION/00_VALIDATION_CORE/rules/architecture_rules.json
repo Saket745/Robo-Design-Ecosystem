@@ -1,0 +1,27 @@
+{
+  "tiers": {
+    "00_CORE_BRAIN": 1,
+    "01_GLOBAL_RULES": 1,
+    "02_SKILLS": 2,
+    "03_SUBAGENTS": 2,
+    "04_MEMORY": 2,
+    "05_MCP": 2,
+    "06_AUTOMATION": 3,
+    "07_SECURITY": 3,
+    "08_VALIDATION": 3,
+    "09_EXECUTION_ENGINE": 3,
+    "10_PROJECT_INTELLIGENCE": 3,
+    "11_KNOWLEDGE_GRAPH": 3,
+    "12_SYSTEM_LOGS": 4,
+    "13_BACKUPS": 4,
+    "14_SANDBOX": 4,
+    "15_RECOVERY": 4,
+    "16_CONFIG": 4,
+    "17_SECRETS": 4
+  },
+  "rules": {
+    "enforce_import_boundaries": true,
+    "direction": "downward_only",
+    "description": "Imports must flow from higher governance (lower tier index, e.g. Tier 1, 2) to lower supporting layers (higher tier index, e.g. Tier 4). A higher-index tier (e.g. Tier 4 Support) is prohibited from importing a lower-index tier (e.g. Tier 1 Governance)."
+  }
+}

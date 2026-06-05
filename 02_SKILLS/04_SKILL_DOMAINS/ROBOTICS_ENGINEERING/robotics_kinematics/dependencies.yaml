@@ -1,5 +1,16 @@
 skill_id: robotics_kinematics
 version: 1.0.0
+runtime: python
+permissions:
+  filesystem:
+    read:
+      - sandbox/
+    write:
+      - sandbox/
+  network: false
+packages:
+  npm: []
+  python: []
 dependencies:
 
 recommended_extensions:

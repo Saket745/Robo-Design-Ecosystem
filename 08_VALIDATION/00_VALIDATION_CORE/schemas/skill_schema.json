@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skill Dependency Schema",
+  "type": "object",
+  "properties": {
+    "skill_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "runtime": {
+      "type": "string",
+      "enum": ["node", "python", "binary", "bash"]
+    },
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "filesystem": {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "write": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["read", "write"]
+        },
+        "network": {
+          "type": "boolean"
+        }
+      },
+      "required": ["filesystem", "network"]
+    },
+    "packages": {
+      "type": "object",
+      "properties": {
+        "npm": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "python": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["npm", "python"]
+    }
+  },
+  "required": ["skill_id", "version", "runtime", "permissions", "packages"]
+}
