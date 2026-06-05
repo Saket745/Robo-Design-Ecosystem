@@ -79,6 +79,13 @@ build/
 04_MEMORY/**/embeddings/*.npy
 04_MEMORY/**/embeddings/*.pkl
 
+# === WORKSPACE AGENT CONFIG ===
+# MCP configs may reference sensitive env vars
+.agents/
+
+# === STATE MANAGER STORE ===
+09_EXECUTION_ENGINE/05_STATE_MANAGER/store/
+
 # === MISC ===
 *.pid
 *.seed

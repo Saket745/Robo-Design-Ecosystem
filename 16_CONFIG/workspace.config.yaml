@@ -1,0 +1,47 @@
+workspace:
+  name: Antigravity Autonomous Workspace
+  version: 1.0.0
+  active_environment: development
+
+paths:
+  root: .
+  modules:
+    core_brain: 00_CORE_BRAIN
+    global_rules: 01_GLOBAL_RULES
+    skills: 02_SKILLS
+    subagents: 03_SUBAGENTS
+    memory: 04_MEMORY
+    mcp: 05_MCP
+    automation: 06_AUTOMATION
+    security: 07_SECURITY
+    validation: 08_VALIDATION
+    execution_engine: 09_EXECUTION_ENGINE
+    project_intelligence: 10_PROJECT_INTELLIGENCE
+    knowledge_graph: 11_KNOWLEDGE_GRAPH
+    system_logs: 12_SYSTEM_LOGS
+    backups: 13_BACKUPS
+    sandbox: 14_SANDBOX
+    recovery: 15_RECOVERY
+    config: 16_CONFIG
+    secrets: 17_SECRETS
+  projects: 10_PROJECT_INTELLIGENCE/02_ACTIVE_PROJECTS
+  dashboard: dashboard
+  scripts: scripts
+
+features:
+  memory_segmentation: true
+  validation_gate: true
+  automatic_backups: true
+  obsidian_integration: true
+  realtime_logs: true
+  sandbox_execution: true
+
+server:
+  host: localhost
+  port: 3000
+  ssl: false
+
+logging:
+  level: debug
+  rotate_daily: true
+  max_files: 30

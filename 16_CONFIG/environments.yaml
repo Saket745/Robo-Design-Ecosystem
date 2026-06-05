@@ -1,0 +1,42 @@
+environments:
+  development:
+    debug: true
+    log_level: debug
+    sandbox:
+      timeout_ms: 10000
+      max_memory_mb: 512
+      write_allowed: true
+    validation:
+      fail_on_warnings: false
+      strict_schema: false
+    security:
+      enforce_token: false
+      bypass_auth: true
+
+  staging:
+    debug: false
+    log_level: info
+    sandbox:
+      timeout_ms: 5000
+      max_memory_mb: 256
+      write_allowed: true
+    validation:
+      fail_on_warnings: true
+      strict_schema: true
+    security:
+      enforce_token: true
+      bypass_auth: false
+
+  production:
+    debug: false
+    log_level: warn
+    sandbox:
+      timeout_ms: 2000
+      max_memory_mb: 128
+      write_allowed: false
+    validation:
+      fail_on_warnings: true
+      strict_schema: true
+    security:
+      enforce_token: true
+      bypass_auth: false

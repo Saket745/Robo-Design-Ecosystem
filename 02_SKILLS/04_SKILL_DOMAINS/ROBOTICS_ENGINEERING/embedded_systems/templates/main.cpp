@@ -6,7 +6,7 @@
 // Stubs for IDE/Linter compliance when not compiling under Arduino IDE
 #include <stdint.h>
 #include <stddef.h>
-#include <stdio.h>
+// Note: stdio.h not needed — SerialClass stub uses empty function bodies
 
 #define IRAM_ATTR
 #define FALLING 0
@@ -24,6 +24,7 @@ typedef void* TaskHandle_t;
 #define xTaskGetTickCount() (0)
 
 #define ledcWrite(channel, duty)
+#define constrain(x, lo, hi) ((x)<(lo)?(lo):((x)>(hi)?(hi):(x)))
 #define map(val, in_min, in_max, out_min, out_max) (0)
 #define pinMode(pin, mode)
 #define digitalWrite(pin, val)
@@ -103,12 +104,19 @@ void SensorTask(void * pvParameters) {
         Wire.endTransmission(false);
         Wire.requestFrom(0x68, 12);
 
-        int16_t ax = (Wire.read() | (Wire.read() << 8));
-        int16_t ay = (Wire.read() | (Wire.read() << 8));
-        int16_t az = (Wire.read() | (Wire.read() << 8));
-        int16_t gx = (Wire.read() | (Wire.read() << 8));
-        int16_t gy = (Wire.read() | (Wire.read() << 8));
-        int16_t gz = (Wire.read() | (Wire.read() << 8));
+        // FIX: Read bytes into temporaries to avoid undefined evaluation
+        // order. C++ does not guarantee which operand of '|' is evaluated
+        // first, so Wire.read() calls could return bytes in swapped order.
+        uint8_t imu_buf[12];
+        for (int b = 0; b < 12; b++) {
+            imu_buf[b] = Wire.read();
+        }
+        int16_t ax = (int16_t)(imu_buf[0]  | (imu_buf[1]  << 8));
+        int16_t ay = (int16_t)(imu_buf[2]  | (imu_buf[3]  << 8));
+        int16_t az = (int16_t)(imu_buf[4]  | (imu_buf[5]  << 8));
+        int16_t gx = (int16_t)(imu_buf[6]  | (imu_buf[7]  << 8));
+        int16_t gy = (int16_t)(imu_buf[8]  | (imu_buf[9]  << 8));
+        int16_t gz = (int16_t)(imu_buf[10] | (imu_buf[11] << 8));
 
         // Format and send IMU telemetry to Jetson over serial/CAN
         Serial.printf("[TELEM] IMU: %d,%d,%d,%d,%d,%d\n", ax, ay, az, gx, gy, gz);
@@ -135,8 +143,13 @@ void ControlTask(void * pvParameters) {
         // Write servo pulses based on targets
         for (int i = 0; i < 12; i++) {
             // Map target angles in radians to PWM duty cycle counts
-            float angle_deg = g_target_angles[i] * 57.2958;
-            uint32_t duty = map(angle_deg, -90, 90, 500, 2500); // map to 500-2500us pulse
+            float angle_deg = g_target_angles[i] * 57.2958f;
+            // FIX: Clamp angle to safe servo range BEFORE mapping.
+            // Without constrain(), out-of-range angles produce duty cycles
+            // outside [500,2500]us which can damage servos or exceed
+            // mechanical joint limits defined in robot.urdf.
+            angle_deg = constrain(angle_deg, -90.0f, 90.0f);
+            uint32_t duty = map((long)angle_deg, -90, 90, 500, 2500);
             ledcWrite(i, duty);
         }
     }
@@ -169,9 +182,12 @@ void loop() {
         long id = CAN.packetId();
         if (id == 0x100) { // Command packet ID
             for (int i = 0; i < 12 && CAN.available(); i++) {
-                // Read joint angle bytes
-                int16_t raw_val = (CAN.read() | (CAN.read() << 8));
-                g_target_angles[i] = raw_val / 1000.0; // scale from milli-rad
+                // FIX: Same evaluation-order bug as SensorTask.
+                // Read low byte first, then high byte, deterministically.
+                uint8_t lo = CAN.read();
+                uint8_t hi = CAN.available() ? CAN.read() : 0;
+                int16_t raw_val = (int16_t)(lo | (hi << 8));
+                g_target_angles[i] = raw_val / 1000.0f; // scale from milli-rad
             }
         }
     }
