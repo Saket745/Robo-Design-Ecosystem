@@ -4,9 +4,25 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const logsDir = path.join(root, '12_SYSTEM_LOGS');
 
+function validatePath(targetPath) {
+  const resolved = path.normalize(path.resolve(targetPath));
+  const resolvedRoot = path.normalize(path.resolve(root));
+  const safeRoot = resolvedRoot.endsWith(path.sep) ? resolvedRoot : resolvedRoot + path.sep;
+  if (!resolved.startsWith(safeRoot) && resolved !== resolvedRoot) {
+    throw new Error(`Security Error: Path '${resolved}' is outside allowed root '${resolvedRoot}'.`);
+  }
+  return resolved;
+}
+
 function ensureDir(dirPath) {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+  const safePath = validatePath(dirPath);
+  const resolvedRoot = path.normalize(path.resolve(root));
+  const safeRoot = resolvedRoot.endsWith(path.sep) ? resolvedRoot : resolvedRoot + path.sep;
+  if (!safePath.startsWith(safeRoot) && safePath !== resolvedRoot) {
+    throw new Error("Security Error: Path outside allowed root");
+  }
+  if (!fs.existsSync(safePath)) {
+    fs.mkdirSync(safePath, { recursive: true });
   }
 }
 
@@ -34,26 +50,38 @@ function logEvent({ event, trace_id, severity = 'info', agent = 'system', projec
   };
 
   const formattedLine = JSON.stringify(logEntry) + '\n';
+  const resolvedRoot = path.normalize(path.resolve(root));
+  const safeRoot = resolvedRoot.endsWith(path.sep) ? resolvedRoot : resolvedRoot + path.sep;
 
   // 1. Write to general execution logs
-  const executionLogDir = path.join(logsDir, '01_EXECUTION_LOGS');
+  const executionLogDir = validatePath(path.join(logsDir, '01_EXECUTION_LOGS'));
   ensureDir(executionLogDir);
-  const generalLogPath = path.join(executionLogDir, 'execution_runs.jsonl');
+  const generalLogPath = validatePath(path.join(executionLogDir, 'execution_runs.jsonl'));
+  if (!generalLogPath.startsWith(safeRoot)) {
+    throw new Error("Security Error: Path outside allowed root");
+  }
   fs.appendFileSync(generalLogPath, formattedLine, 'utf8');
 
   // 2. Write to agent-specific logs if agent defined
   if (agent && agent !== 'system') {
-    const agentLogDir = path.join(logsDir, '02_AGENT_LOGS', agent);
+    const sanitizedAgent = path.basename(agent).replace(/[^a-zA-Z0-9_-]/g, '');
+    const agentLogDir = validatePath(path.join(logsDir, '02_AGENT_LOGS', sanitizedAgent));
     ensureDir(agentLogDir);
-    const agentLogPath = path.join(agentLogDir, 'activity.jsonl');
+    const agentLogPath = validatePath(path.join(agentLogDir, 'activity.jsonl'));
+    if (!agentLogPath.startsWith(safeRoot)) {
+      throw new Error("Security Error: Path outside allowed root");
+    }
     fs.appendFileSync(agentLogPath, formattedLine, 'utf8');
   }
 
   // 3. Write to audit logs if severity is warning/critical or it's a state modification
   if (severity === 'critical' || severity === 'warning' || event.includes('state') || event.includes('modify')) {
-    const auditLogDir = path.join(logsDir, '08_AUDIT_LOGS');
+    const auditLogDir = validatePath(path.join(logsDir, '08_AUDIT_LOGS'));
     ensureDir(auditLogDir);
-    const auditLogPath = path.join(auditLogDir, 'audit.jsonl');
+    const auditLogPath = validatePath(path.join(auditLogDir, 'audit.jsonl'));
+    if (!auditLogPath.startsWith(safeRoot)) {
+      throw new Error("Security Error: Path outside allowed root");
+    }
     fs.appendFileSync(auditLogPath, formattedLine, 'utf8');
   }
 

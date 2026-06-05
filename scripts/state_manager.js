@@ -7,8 +7,9 @@ const backupDir = path.resolve(root, '13_BACKUPS', '01_SNAPSHOTS');
 
 function validatePath(targetPath) {
   const resolved = path.normalize(path.resolve(targetPath));
-  const resolvedRoot = path.normalize(root);
-  if (!resolved.startsWith(resolvedRoot + path.sep) && resolved !== resolvedRoot) {
+  const resolvedRoot = path.normalize(path.resolve(root));
+  const safeRoot = resolvedRoot.endsWith(path.sep) ? resolvedRoot : resolvedRoot + path.sep;
+  if (!resolved.startsWith(safeRoot) && resolved !== resolvedRoot) {
     throw new Error(`Security Error: Path '${resolved}' is outside allowed root '${resolvedRoot}'.`);
   }
   return resolved;
@@ -27,7 +28,8 @@ function safeResolveBackupPath(version) {
     throw new Error("Invalid version parameter.");
   }
   const resolved = validatePath(path.join(backupDir, `state_v${safeVersion}.json`));
-  const safeBackupDir = path.normalize(backupDir);
+  const resolvedBackupDir = path.normalize(path.resolve(backupDir));
+  const safeBackupDir = resolvedBackupDir.endsWith(path.sep) ? resolvedBackupDir : resolvedBackupDir + path.sep;
   if (!resolved.startsWith(safeBackupDir)) {
     throw new Error("Security Alert: Path traversal attempt blocked.");
   }

@@ -8,8 +8,9 @@ const activeProjectsDir = path.join(root, 'antigravity-platform', '10_PROJECT_IN
 
 function validatePath(targetPath, baseDir) {
   const resolved = path.normalize(path.resolve(targetPath));
-  const resolvedBase = path.normalize(baseDir || root);
-  if (!resolved.startsWith(resolvedBase + path.sep) && resolved !== resolvedBase) {
+  const resolvedBase = path.normalize(path.resolve(baseDir || root));
+  const safeBase = resolvedBase.endsWith(path.sep) ? resolvedBase : resolvedBase + path.sep;
+  if (!resolved.startsWith(safeBase) && resolved !== resolvedBase) {
     throw new Error(`Security Error: Path '${resolved}' is outside allowed base '${resolvedBase}'.`);
   }
   return resolved;
