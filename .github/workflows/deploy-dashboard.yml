@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Node.js
-        uses: actions/setup-node@601291d996c5b77ee10ff35523614b8a1fef2ad6 # v4.0.3
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: 18
 
@@ -35,10 +35,10 @@ jobs:
         run: npx vite build dashboard --outDir dist
 
       - name: Setup Pages
-        uses: actions/configure-pages@983d626a19e051b47305bc51736157f8f43e2579 # v5.0.0
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda996908606 # v3.0.1
+        uses: actions/upload-pages-artifact@56afc6092416f726a3cc445f07019f6277083893 # v3.0.1
         with:
           path: './dashboard/dist'
 
