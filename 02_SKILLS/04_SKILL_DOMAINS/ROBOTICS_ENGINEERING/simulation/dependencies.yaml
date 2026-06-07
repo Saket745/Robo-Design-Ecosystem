@@ -1,5 +1,16 @@
 skill_id: simulation
 version: 1.0.0
+runtime: python
+permissions:
+  filesystem:
+    read:
+      - sandbox/
+    write:
+      - sandbox/
+  network: false
+packages:
+  npm: []
+  python: []
 dependencies:
   - cad_design
   - robotics_kinematics

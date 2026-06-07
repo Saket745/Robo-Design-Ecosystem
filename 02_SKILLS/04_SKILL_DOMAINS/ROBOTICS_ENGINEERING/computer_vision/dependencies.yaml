@@ -1,5 +1,16 @@
 skill_id: computer_vision
 version: 1.0.0
+runtime: python
+permissions:
+  filesystem:
+    read:
+      - sandbox/
+    write:
+      - sandbox/
+  network: false
+packages:
+  npm: []
+  python: []
 dependencies:
   - sensor_fusion
 recommended_extensions:

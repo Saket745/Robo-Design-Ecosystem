@@ -1,0 +1,465 @@
+{
+  "skills": [
+    {
+      "id": "bom_procurement",
+      "name": "BOM & Procurement",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "bom",
+        "spreadsheet",
+        "budget",
+        "parts"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/bom_procurement/skill.md",
+      "dependencies": [
+        "pcb_design",
+        "cad_design"
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/bom_procurement/validation.md",
+      "keywords": [
+        "bill of materials",
+        "bom",
+        "procurement",
+        "components",
+        "digikey",
+        "parts list"
+      ],
+      "inputs": [
+        "Chassis CAD components list",
+        "PCB schematics component list",
+        "Subsystem target budgets"
+      ],
+      "outputs": [
+        "Ecosystem Bill of Materials spreadsheet (.xlsx, .csv)"
+      ],
+      "purpose": "Generate components bill of materials, verify supply chains, and calculate budget costs."
+    },
+    {
+      "id": "cad_design",
+      "name": "CAD Design",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "cad",
+        "mechanics",
+        "geometry",
+        "blender",
+        "step",
+        "robot_chassis"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/cad_design/skill.md",
+      "dependencies": [
+        ""
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/cad_design/validation.md",
+      "keywords": [
+        "mesh",
+        "3d model",
+        "blender",
+        "step",
+        "urdf",
+        "morphology",
+        "chassis"
+      ],
+      "inputs": [
+        "Robot morphology dimensions (height, width, leg segments)",
+        "Material specifications (density, yield strength)",
+        "Actuator mounting layouts and dimensions"
+      ],
+      "outputs": [
+        "3D Mesh files (.stl, .obj)",
+        "Exchangeable CAD files (.step)",
+        "URDF link visual/collision geometry"
+      ],
+      "purpose": "Procedural and physical morphology modeling of robot chassis, legs, and mounts."
+    },
+    {
+      "id": "computer_vision",
+      "name": "Computer Vision",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "vision",
+        "camera",
+        "slam",
+        "opencv",
+        "object_detection"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/computer_vision/skill.md",
+      "dependencies": [
+        "sensor_fusion"
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/computer_vision/validation.md",
+      "keywords": [
+        "opencv",
+        "yolo",
+        "orb-slam",
+        "visual odometry",
+        "depth camera"
+      ],
+      "inputs": [
+        "RGB-D depth camera stream",
+        "Camera intrinsic/extrinsic calibration data"
+      ],
+      "outputs": [
+        "Depth point cloud arrays",
+        "Bounding boxes of detected items"
+      ],
+      "purpose": "Extract depth mappings, detect obstacles, and recognize interactive items."
+    },
+    {
+      "id": "embedded_systems",
+      "name": "Embedded Systems",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "firmware",
+        "micro",
+        "microcontroller",
+        "esp32",
+        "cplusplus",
+        "arduino"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/embedded_systems/skill.md",
+      "dependencies": [
+        "motor_control",
+        "sensor_fusion"
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/embedded_systems/validation.md",
+      "keywords": [
+        "mcu",
+        "gpio",
+        "i2c",
+        "spi",
+        "pwm",
+        "serial",
+        "freertos"
+      ],
+      "inputs": [
+        "Target pinout map from PCB schematic",
+        "Sensor sampling rates and communication protocols (I2C/SPI/CAN)",
+        "Target micro-controller specification"
+      ],
+      "outputs": [
+        "C++ firmware source code (.cpp, .h)",
+        "Compiled binary firmware (.bin, .hex)"
+      ],
+      "purpose": "Write and flash micro-controller firmware for sensor reading and actuator commands."
+    },
+    {
+      "id": "manufacturing",
+      "name": "Manufacturing",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "manufacturing",
+        "3dprint",
+        "cnc",
+        "stl",
+        "gcode"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/manufacturing/skill.md",
+      "dependencies": [
+        "cad_design"
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/manufacturing/validation.md",
+      "keywords": [
+        "3d print",
+        "sla",
+        "fdm",
+        "cnc",
+        "infills",
+        "pla",
+        "g-code"
+      ],
+      "inputs": [
+        "STEP/STL mechanical mesh files",
+        "Material density and strength requirements",
+        "Target tolerances"
+      ],
+      "outputs": [
+        "Slicer printer configurations",
+        "CNC milling G-Code files"
+      ],
+      "purpose": "Generate toolpaths, infill patterns, and machining plans for mechanical parts."
+    },
+    {
+      "id": "motor_control",
+      "name": "Motor Control",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "motors",
+        "actuator",
+        "servo",
+        "pid",
+        "pwm",
+        "feedback"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/motor_control/skill.md",
+      "dependencies": [
+        ""
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/motor_control/validation.md",
+      "keywords": [
+        "pid",
+        "servo",
+        "odrive",
+        "can bus",
+        "encoder",
+        "current control"
+      ],
+      "inputs": [
+        "Motor voltage, phase resistance, and KV ratings",
+        "Encoder counts per revolution (CPR)",
+        "Target torque, speed, or position commands"
+      ],
+      "outputs": [
+        "Calibrated motor feedback configurations",
+        "Actuator command loops"
+      ],
+      "purpose": "Actuator driver tuning, calibration, and closed-loop speed/position control."
+    },
+    {
+      "id": "pcb_design",
+      "name": "PCB Design",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "electronics",
+        "circuit",
+        "pcb",
+        "schematic",
+        "kicad"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/pcb_design/skill.md",
+      "dependencies": [
+        "power_systems"
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/pcb_design/validation.md",
+      "keywords": [
+        "schematic",
+        "routing",
+        "trace",
+        "gerber",
+        "bom",
+        "pinout"
+      ],
+      "inputs": [
+        "Schematic design requirements",
+        "Target microcontroller pinouts (ESP32/Jetson)",
+        "Sensor interfaces and voltage limits"
+      ],
+      "outputs": [
+        "Schematics files (.sch)",
+        "PCB Layout design (.kicad_pcb)",
+        "Gerber manufacturing files"
+      ],
+      "purpose": "Design and validate custom robotics control system PCBs."
+    },
+    {
+      "id": "power_systems",
+      "name": "Power Systems",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "power",
+        "battery",
+        "liion",
+        "bms",
+        "voltage",
+        "current"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/power_systems/skill.md",
+      "dependencies": [
+        ""
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/power_systems/validation.md",
+      "keywords": [
+        "battery",
+        "bms",
+        "buck converter",
+        "voltage divider",
+        "step down"
+      ],
+      "inputs": [
+        "Continuous and peak current draw requirements",
+        "Operating voltage requirements of all subsystems",
+        "Target battery chemistry and weight limits"
+      ],
+      "outputs": [
+        "Ecosystem power distribution budget",
+        "Regulator schematics"
+      ],
+      "purpose": "Design battery configurations, charge protection circuits, and regulator distributions."
+    },
+    {
+      "id": "robotics_kinematics",
+      "name": "Robotics Kinematics",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "kinematics",
+        "math",
+        "inverse_kinematics",
+        "forward_kinematics",
+        "gait",
+        "trajectory"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/robotics_kinematics/skill.md",
+      "dependencies": [
+        ""
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/robotics_kinematics/validation.md",
+      "keywords": [
+        "inverse kinematics",
+        "ik",
+        "jacobian",
+        "dh parameters",
+        "gait generation"
+      ],
+      "inputs": [
+        "Leg segment lengths and physical offsets",
+        "Joint angle limits (minimum/maximum degrees)",
+        "Target foot tip trajectories (x, y, z path)"
+      ],
+      "outputs": [
+        "Kinematic models (DH parameters or analytical solutions)",
+        "Gait trajectory tables (.json, .csv)"
+      ],
+      "purpose": "Compute forward and inverse kinematics models and generate gait trajectories."
+    },
+    {
+      "id": "ros2_architecture",
+      "name": "ROS2 Architecture",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "ros2",
+        "nodes",
+        "pubsub",
+        "humble",
+        "dds"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/ros2_architecture/skill.md",
+      "dependencies": [
+        "embedded_systems"
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/ros2_architecture/validation.md",
+      "keywords": [
+        "topic",
+        "subscriber",
+        "publisher",
+        "service",
+        "action",
+        "colcon"
+      ],
+      "inputs": [
+        "List of software nodes and responsibilities",
+        "Communication update rate constraints"
+      ],
+      "outputs": [
+        "Node dependency charts",
+        "ROS2 Packages, launch scripts, and custom message schemas (.msg, .srv)"
+      ],
+      "purpose": "Configure topics, services, actions, and custom interfaces for multi-node communication."
+    },
+    {
+      "id": "sensor_fusion",
+      "name": "Sensor Fusion",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "sensors",
+        "imu",
+        "lidar",
+        "fusion",
+        "kalman",
+        "odometry"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/sensor_fusion/skill.md",
+      "dependencies": [
+        ""
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/sensor_fusion/validation.md",
+      "keywords": [
+        "kalman filter",
+        "imu",
+        "ekf",
+        "madgwick",
+        "pose estimation"
+      ],
+      "inputs": [
+        "Raw IMU accelerometer/gyroscope readings",
+        "Wheel/joint encoder state telemetry",
+        "Lidar scanning arrays"
+      ],
+      "outputs": [
+        "Filtered robot pose (orientation, position, velocity)"
+      ],
+      "purpose": "Synthesize data from IMUs, LiDAR, encoders, and cameras to estimate robot pose."
+    },
+    {
+      "id": "simulation",
+      "name": "Simulation",
+      "domain": "robotics_engineering",
+      "type": "domain_skill",
+      "tags": [
+        "simulation",
+        "gazebo",
+        "pybullet",
+        "ros2",
+        "physics"
+      ],
+      "version": "1.0.0",
+      "status": "active",
+      "entrypoint": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/simulation/skill.md",
+      "dependencies": [
+        "cad_design",
+        "robotics_kinematics"
+      ],
+      "validation": "02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING/simulation/validation.md",
+      "keywords": [
+        "gazebo",
+        "urdf",
+        "sdf",
+        "pybullet",
+        "joint controller",
+        "simulation"
+      ],
+      "inputs": [
+        "Robot URDF descriptions",
+        "World collision models and mesh environments",
+        "Control node topics"
+      ],
+      "outputs": [
+        "Simulation log outputs",
+        "Sensor emulation data streams"
+      ],
+      "purpose": "Physics-based evaluation of kinematics, controllers, and odometry in virtual environments."
+    }
+  ]
+}

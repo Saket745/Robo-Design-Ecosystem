@@ -1,0 +1,14 @@
+{
+  "directory_patterns": {
+    "top_level": "^\\d{2}_[A-Z0-9_]+$",
+    "submodules": "^[a-zA-Z0-9_]+$",
+    "domains": "^[a-z0-9_]+$"
+  },
+  "file_patterns": {
+    "javascript": "^[a-z0-9_-]+\\.js$",
+    "python": "^[a-z0-9_-]+\\.py$",
+    "json": "^[a-z0-9_-]+\\.json$",
+    "yaml": "^([a-z0-9_\\.-]+|MANIFEST|RECOVERY_MASTER|SYSTEM_DNA)\\.ya?ml$",
+    "markdown": "^([a-zA-Z0-9_-]+|README|skill|validation|dependencies)\\.md$"
+  }
+}

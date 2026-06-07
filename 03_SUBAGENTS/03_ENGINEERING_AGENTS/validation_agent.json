@@ -1,0 +1,14 @@
+{
+  "name": "validation_agent",
+  "domain": "validation",
+  "capabilities": ["syntax_check", "schema_validation", "naming_compliance"],
+  "constraints": {
+    "isolated_execution": true,
+    "domain_restriction": true,
+    "unrestricted_filesystem_access": true,
+    "unrestricted_network_access": false
+  },
+  "communication_protocol": "DIRECT_MESSAGE",
+  "memory_access": ["global"],
+  "execution_timeout": 15000
+}

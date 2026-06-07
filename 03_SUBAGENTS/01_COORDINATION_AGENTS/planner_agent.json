@@ -1,0 +1,14 @@
+{
+  "name": "planner_agent",
+  "domain": "coordination",
+  "capabilities": ["task_planning", "dag_generation", "workflow_orchestration"],
+  "constraints": {
+    "isolated_execution": false,
+    "domain_restriction": false,
+    "unrestricted_filesystem_access": true,
+    "unrestricted_network_access": true
+  },
+  "communication_protocol": "DIRECT_MESSAGE",
+  "memory_access": ["global", "project"],
+  "execution_timeout": 60000
+}

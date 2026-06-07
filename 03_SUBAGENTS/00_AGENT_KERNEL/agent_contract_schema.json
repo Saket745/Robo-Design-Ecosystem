@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Definition Schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "isolated_execution": { "type": "boolean" },
+        "domain_restriction": { "type": "boolean" },
+        "unrestricted_filesystem_access": { "type": "boolean" },
+        "unrestricted_network_access": { "type": "boolean" }
+      }
+    },
+    "communication_protocol": {
+      "type": "string"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "memory_access": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "execution_timeout": {
+      "type": "integer"
+    }
+  },
+  "required": ["name", "domain", "capabilities", "constraints", "communication_protocol"]
+}
