@@ -74,6 +74,23 @@ async function initApp() {
 
     // Remove loading indicator
     loader.remove();
+
+    // Start 30-second auto-refresh
+    setInterval(async () => {
+      try {
+        const stateRes = await fetch('/api/state');
+        const stateData = await stateRes.json();
+        completionStatus = stateData.completion_map || {};
+        loadOverviewTab();
+
+        const activeNav = document.querySelector(".nav-item.active");
+        if (activeNav && activeNav.getAttribute("data-tab") === "logs") {
+          fetchLogs();
+        }
+      } catch (e) {
+        console.warn("Auto-refresh state fetch failed:", e);
+      }
+    }, 30000);
   } catch (err) {
     loader.innerHTML = `
       <span style="color: var(--accent-crimson);">⚠️</span>

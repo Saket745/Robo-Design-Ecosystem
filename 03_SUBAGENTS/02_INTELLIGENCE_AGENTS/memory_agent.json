@@ -1,0 +1,14 @@
+{
+  "name": "memory_agent",
+  "domain": "memory_management",
+  "capabilities": ["memory_retrieval", "semantic_association", "pattern_extraction"],
+  "constraints": {
+    "isolated_execution": true,
+    "domain_restriction": true,
+    "unrestricted_filesystem_access": false,
+    "unrestricted_network_access": false
+  },
+  "communication_protocol": "DIRECT_MESSAGE",
+  "memory_access": ["global", "project", "patterns", "architecture"],
+  "execution_timeout": 30000
+}

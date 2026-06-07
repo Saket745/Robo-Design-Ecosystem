@@ -5,11 +5,18 @@ const url = require('url');
 
 // Import ecosystem engines
 const stateManager = require('./state_manager');
-const semanticRouter = require('../02_SKILLS/02_AGENTIC_ROUTING/semantic_router');
+const semanticRouter = require('../02_SKILLS/02_AGENTIC_ROUTING/router');
 const orchestrator = require('../03_SUBAGENTS/01_COORDINATION_AGENTS/master_orchestrator/orchestrator');
 const DAGEngine = require('../09_EXECUTION_ENGINE/02_DAG_ENGINE/dag_engine');
 const validationPipeline = require('../08_VALIDATION/00_VALIDATION_CORE/validation_pipeline');
 const logger = require('./logger');
+
+let agentKernel = null;
+try {
+  agentKernel = require('../03_SUBAGENTS/00_AGENT_KERNEL/agent_kernel');
+} catch (e) {
+  // Agent kernel not implemented yet
+}
 
 const PORT = 3000;
 const rootDir = path.resolve(__dirname, '..');
@@ -83,28 +90,63 @@ const server = http.createServer(async (req, res) => {
 
   try {
     // API endpoints
-    if (pathname === '/api/state') {
+    if (pathname === '/api/state' || pathname.startsWith('/api/state/')) {
+      let projectId = 'robot_project';
+      if (pathname.startsWith('/api/state/')) {
+        projectId = pathname.substring(11).trim();
+      } else if (parsedUrl.query.projectId) {
+        projectId = parsedUrl.query.projectId;
+      }
+
       if (method === 'GET') {
-        const state = stateManager.getState();
+        const realStateManager = require('../09_EXECUTION_ENGINE/05_STATE_MANAGER/state_manager');
+        realStateManager.initState(projectId);
+        const state = realStateManager.getState();
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(state));
       } else if (method === 'POST') {
         const body = await parseJsonBody(req);
-        const nextState = stateManager.updateState(body);
+        const realStateManager = require('../09_EXECUTION_ENGINE/05_STATE_MANAGER/state_manager');
+        realStateManager.initState(projectId);
+        const nextState = realStateManager.updateState(body);
         
         // Log changes
         logger.logEvent({
           event: 'state_user_update',
           trace_id: 'user_session',
           severity: 'info',
-          message: 'Project parameters updated manually from control center.',
+          message: `Project parameters updated manually for ${projectId} from control center.`,
           payload: body
         });
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(nextState));
       }
-    } 
+    }
+    
+    else if (pathname === '/api/status' && method === 'GET') {
+      const statusResponse = {
+        status: "healthy",
+        uptime: process.uptime(),
+        loaded_modules: [
+          "state_manager",
+          "registry",
+          "router",
+          "dag_engine",
+          "memory_kernel",
+          "validation_pipeline"
+        ],
+        active_tasks: []
+      };
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(statusResponse));
+    }
+
+    else if (pathname === '/api/agents' && method === 'GET') {
+      const agents = agentKernel ? agentKernel.getAgentRegistry() : [];
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(agents));
+    }
     
     else if (pathname === '/api/skills' && method === 'GET') {
       const registry = semanticRouter.loadRegistry();
@@ -289,9 +331,22 @@ const server = http.createServer(async (req, res) => {
     } 
     
     else if (pathname === '/api/logs' && method === 'GET') {
+      const logType = parsedUrl.query.type || 'execution';
+      const limit = parseInt(parsedUrl.query.limit, 10) || 50;
+      let targetLogFile = logsFile;
+
+      if (logType === 'audit') {
+        targetLogFile = path.join(rootDir, '12_SYSTEM_LOGS', '01_AUDIT_LOGS', 'audit.jsonl');
+      } else if (logType === 'execution') {
+        targetLogFile = path.join(rootDir, '12_SYSTEM_LOGS', '02_EXECUTION_LOGS', 'execution.jsonl');
+        if (!fs.existsSync(targetLogFile)) {
+          targetLogFile = logsFile;
+        }
+      }
+
       const logs = [];
-      if (fs.existsSync(logsFile)) {
-        const fileContent = fs.readFileSync(logsFile, 'utf8');
+      if (fs.existsSync(targetLogFile)) {
+        const fileContent = fs.readFileSync(targetLogFile, 'utf8');
         const lines = fileContent.split('\n');
         for (const line of lines) {
           if (line.trim()) {
@@ -304,8 +359,58 @@ const server = http.createServer(async (req, res) => {
         }
       }
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(logs.reverse().slice(0, 100))); // Return last 100 logs in reverse chronological order
-    } 
+      res.end(JSON.stringify(logs.reverse().slice(0, limit)));
+    }
+
+    else if (pathname === '/api/validate' && method === 'POST') {
+      const Validator = require('../08_VALIDATION/00_VALIDATION_CORE/validator');
+      const validator = new Validator();
+      const pipelineResult = validator.runPipeline(rootDir, ['schema', 'naming', 'dependencies']);
+      
+      const forbiddenPatterns = [
+        /^\.env$/,
+        /client_secret.*\.json$/,
+        /secrets?\.json$/,
+        /\.key$/,
+        /id_rsa/
+      ];
+      const hygieneIssues = [];
+      function walkDir(dir) {
+        fs.readdirSync(dir).forEach(f => {
+          const dirPath = path.join(dir, f);
+          const isDirectory = fs.statSync(dirPath).isDirectory();
+          if (f === 'node_modules' || f === '.git' || f === '17_SECRETS' || f === '13_BACKUPS') {
+            return;
+          }
+          if (isDirectory) {
+            walkDir(dirPath);
+          } else {
+            const basename = path.basename(dirPath);
+            forbiddenPatterns.forEach(pattern => {
+              if (pattern.test(basename)) {
+                hygieneIssues.push(`Security Violation: Forbidden file pattern detected: ${path.relative(rootDir, dirPath)}`);
+              }
+            });
+          }
+        });
+      }
+      try {
+        walkDir(rootDir);
+      } catch (err) {
+        hygieneIssues.push(`Hygiene scan failed: ${err.message}`);
+      }
+
+      const passed = pipelineResult.pass && hygieneIssues.length === 0;
+      const errors = [...pipelineResult.errors, ...hygieneIssues];
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: passed,
+        passed: passed,
+        errors: errors,
+        warnings: pipelineResult.warnings || []
+      }));
+    }
     
     // Serve static dashboard files
     else {

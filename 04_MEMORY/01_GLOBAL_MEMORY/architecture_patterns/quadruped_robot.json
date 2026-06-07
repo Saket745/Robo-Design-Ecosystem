@@ -1,0 +1,16 @@
+{
+  "pattern_id": "quadruped_robot",
+  "name": "Quadruped Robot Architecture",
+  "description": "Standard 12-DOF quadruped robot architecture layout with 3 joints per leg (hip roll, hip pitch, knee pitch).",
+  "structure": {
+    "chassis": "Center rectangular torso plate hosting batteries, flight controller, and motor controllers.",
+    "legs": [
+      { "name": "front_left", "dof": 3, "joints": ["hip_roll", "hip_pitch", "knee_pitch"] },
+      { "name": "front_right", "dof": 3, "joints": ["hip_roll", "hip_pitch", "knee_pitch"] },
+      { "name": "rear_left", "dof": 3, "joints": ["hip_roll", "hip_pitch", "knee_pitch"] },
+      { "name": "rear_right", "dof": 3, "joints": ["hip_roll", "hip_pitch", "knee_pitch"] }
+    ],
+    "sensors": ["imu", "depth_camera", "lidar", "foot_contact_sensors"],
+    "actuators": "High-torque brushless DC motors or high-performance smart servos with CAN bus communication."
+  }
+}

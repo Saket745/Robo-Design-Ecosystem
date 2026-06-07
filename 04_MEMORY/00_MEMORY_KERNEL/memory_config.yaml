@@ -1,0 +1,13 @@
+layers:
+  global:
+    path: "04_MEMORY/01_GLOBAL_MEMORY/global_store.json"
+    max_entries: 1000
+  project:
+    path: "04_MEMORY/02_PROJECT_MEMORY/project_store.json"
+    max_entries: 500
+  patterns:
+    path: "04_MEMORY/03_REUSABLE_PATTERNS/patterns_store.json"
+    max_entries: 200
+  architecture:
+    path: "04_MEMORY/03_REUSABLE_PATTERNS/architecture_store.json"
+    max_entries: 100

@@ -1,0 +1,13 @@
+{
+  "keys": {
+    "proj_key": {
+      "value": "proj_val",
+      "metadata": {
+        "timestamp": "2026-06-06T14:56:50.442Z"
+      }
+    }
+  },
+  "order": [
+    "proj_key"
+  ]
+}

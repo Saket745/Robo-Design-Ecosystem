@@ -1,0 +1,14 @@
+{
+  "name": "cad_agent",
+  "domain": "robotics",
+  "capabilities": ["chassis_design", "motor_sizing", "urdf_generation"],
+  "constraints": {
+    "isolated_execution": true,
+    "domain_restriction": true,
+    "unrestricted_filesystem_access": true,
+    "unrestricted_network_access": false
+  },
+  "communication_protocol": "DIRECT_MESSAGE",
+  "memory_access": ["project", "architecture"],
+  "execution_timeout": 45000
+}

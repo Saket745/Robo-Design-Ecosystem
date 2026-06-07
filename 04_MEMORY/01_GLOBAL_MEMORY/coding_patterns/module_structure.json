@@ -1,0 +1,11 @@
+{
+  "pattern_id": "module_structure",
+  "name": "Standard Module Boilerplate",
+  "description": "Boilerplate pattern for node.js modules under the Antigravity ecosystem.",
+  "boilerplate": {
+    "exports": "Module exports must explicitly define clear and minimal APIs.",
+    "error_handling": "Always use try-catch blocks with helpful structured logs.",
+    "security": "Validate all filesystem paths using a helper function before reading or writing.",
+    "imports": "Keep static requires grouped at the top of the file, obeying layered architecture limits."
+  }
+}

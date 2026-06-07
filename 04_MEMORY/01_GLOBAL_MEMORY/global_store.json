@@ -1,0 +1,35 @@
+{
+  "keys": {
+    "test_key": {
+      "value": {
+        "some": "data"
+      },
+      "metadata": {
+        "category": "test",
+        "priority": "high",
+        "timestamp": "2026-06-06T14:56:50.402Z"
+      }
+    },
+    "key_2": {
+      "value": "val_2",
+      "metadata": {
+        "category": "production",
+        "priority": "high",
+        "timestamp": "2026-06-06T14:56:50.430Z"
+      }
+    },
+    "key_3": {
+      "value": "val_3",
+      "metadata": {
+        "category": "test",
+        "priority": "low",
+        "timestamp": "2026-06-06T14:56:50.433Z"
+      }
+    }
+  },
+  "order": [
+    "test_key",
+    "key_2",
+    "key_3"
+  ]
+}

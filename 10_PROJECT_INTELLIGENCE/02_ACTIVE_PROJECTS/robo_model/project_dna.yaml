@@ -1,0 +1,36 @@
+project:
+  name: Robo Model
+  type: quadruped_robot
+  classification: bio_inspired_locomotion
+  status: active
+robot:
+  morphology: quadruped
+  dof: 12  # 3 joints × 4 legs
+  legs: 4
+  joints_per_leg: 3  # hip, knee, ankle
+  dimensions:
+    body_length_mm: 300
+    body_width_mm: 180
+    body_height_mm: 80
+    leg_upper_mm: 120
+    leg_lower_mm: 130
+    total_height_standing_mm: 280
+  weight_budget_g: 2500
+hardware:
+  mcu: ESP32-WROOM-32
+  compute: Raspberry Pi 4 (4GB)
+  servos: MG996R × 12
+  imu: MPU6050
+  battery: 3S LiPo 11.1V 2200mAh
+  sensors:
+    - ultrasonic: HC-SR04 × 2
+    - camera: RPi Camera Module v3
+  communication:
+    - WiFi (ESP32 built-in)
+    - Bluetooth (ESP32 built-in)
+    - UART (ESP32 ↔ RPi)
+software:
+  framework: ROS2 Humble
+  firmware: MicroROS on ESP32
+  simulation: Gazebo Fortress + PyBullet
+  control_frequency_hz: 50

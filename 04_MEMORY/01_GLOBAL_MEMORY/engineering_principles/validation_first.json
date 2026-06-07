@@ -1,0 +1,11 @@
+{
+  "principle_id": "validation_first",
+  "name": "Validation-First Workflow",
+  "description": "Core software and hardware design principle prioritizing early validation simulation before physical execution.",
+  "steps": [
+    "1. Static syntax and type validation.",
+    "2. Schema compliance validation against predefined JSON schemas.",
+    "3. Kinematic and physical simulation under Gazebo or PyBullet.",
+    "4. Hardware-in-the-loop (HIL) safety checks before physical deployment."
+  ]
+}
