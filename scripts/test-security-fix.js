@@ -119,6 +119,48 @@ async function runTests() {
       failed = true;
     }
 
+    // Test 6: Fetching valid project ID state -> should succeed (200)
+    console.log('\n[Test 6] Fetching state with valid project ID /api/state/test_valid_proj_123...');
+    const res6 = await makeRequest('/api/state/test_valid_proj_123');
+    if (res6.statusCode === 200) {
+      console.log('✅ Test 6 Passed: Successfully fetched state for valid project ID (200 OK)');
+    } else {
+      console.error(`❌ Test 6 Failed: Expected status 200, got ${res6.statusCode}`);
+      failed = true;
+    }
+
+    // Test 7: Malicious project ID with path traversal -> should fail with 400 Bad Request
+    console.log('\n[Test 7] Fetching state with malicious path-traversal project ID /api/state?projectId=../../etc/passwd...');
+    const res7 = await makeRequest('/api/state?projectId=../../etc/passwd');
+    if (res7.statusCode === 400) {
+      const body = JSON.parse(res7.body);
+      if (body.success === false && body.error.includes('Invalid Project ID format')) {
+        console.log('✅ Test 7 Passed: Properly blocked path traversal project ID with 400 Bad Request');
+      } else {
+        console.error('❌ Test 7 Failed: Expected invalid project ID format error, got:', body);
+        failed = true;
+      }
+    } else {
+      console.error(`❌ Test 7 Failed: Expected status 400, got ${res7.statusCode}`);
+      failed = true;
+    }
+
+    // Test 8: Malicious project ID with special characters -> should fail with 400 Bad Request
+    console.log('\n[Test 8] Fetching state with invalid special characters project ID /api/state/project-illegal$...');
+    const res8 = await makeRequest('/api/state/project-illegal$');
+    if (res8.statusCode === 400) {
+      const body = JSON.parse(res8.body);
+      if (body.success === false && body.error.includes('Invalid Project ID format')) {
+        console.log('✅ Test 8 Passed: Properly blocked illegal characters in project ID with 400 Bad Request');
+      } else {
+        console.error('❌ Test 8 Failed: Expected invalid project ID format error, got:', body);
+        failed = true;
+      }
+    } else {
+      console.error(`❌ Test 8 Failed: Expected status 400, got ${res8.statusCode}`);
+      failed = true;
+    }
+
   } catch (err) {
     console.error('An error occurred during test execution:', err);
     failed = true;

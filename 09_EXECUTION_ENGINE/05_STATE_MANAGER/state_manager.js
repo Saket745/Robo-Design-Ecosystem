@@ -50,6 +50,9 @@ function initState(projectId) {
   if (!projectId || typeof projectId !== 'string') {
     throw new Error('Project ID must be a non-empty string');
   }
+  if (!/^[a-zA-Z0-9_-]+$/.test(projectId)) {
+    throw new Error('Security Error: Invalid Project ID format.');
+  }
   activeProjectId = projectId;
   
   const storeDir = getStoreDir();
@@ -183,6 +186,9 @@ function createCheckpoint(label) {
 
 function rollback(checkpointId) {
   ensureActiveProject();
+  if (checkpointId && !/^[a-zA-Z0-9_-]+$/.test(String(checkpointId))) {
+    throw new Error('Security Error: Invalid checkpoint ID format.');
+  }
   const storeDir = getStoreDir();
   let checkpointFile = null;
   const state = getState();

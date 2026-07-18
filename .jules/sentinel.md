@@ -1,0 +1,4 @@
+## 2026-07-18 - Input Validation and Path Traversal Prevention in State Manager
+**Vulnerability:** The state manager endpoints accepted arbitrary, unsanitized `projectId` parameters which were directly interpolated into file paths via `path.join`. This introduced a path traversal vulnerability that could allow malicious directory traversal, arbitrary file writes/creation, and reading files outside designated storage directories.
+**Learning:** Even when path helpers (like `validatePath`) are defined in modules, they may remain unused due to developer oversight, leaving internal states and disk I/O exposed to external manipulation.
+**Prevention:** Always enforce input validation at both the network layer (the HTTP routing and request processing) and deep in the core engine (defense-in-depth). Validate identifiers against strict alphanumeric regex patterns (e.g., `^[a-zA-Z0-9_-]+$`) to prevent formatting and traversal vectors from propagating to disk.
