@@ -104,13 +104,15 @@ void SensorTask(void * pvParameters) {
         Wire.endTransmission(false);
         Wire.requestFrom(0x68, 12);
 
-        // FIX: Read bytes into temporaries to avoid undefined evaluation
-        // order. C++ does not guarantee which operand of '|' is evaluated
-        // first, so Wire.read() calls could return bytes in swapped order.
+        // FIX: Read bytes into a temporary buffer to ensure deterministic evaluation
+        // order, since C++ does not guarantee the sequence of evaluation for '|' operands,
+        // and direct Wire.read() calls in a single expression can return bytes in swapped order.
         uint8_t imu_buf[12];
         for (int b = 0; b < 12; b++) {
             imu_buf[b] = Wire.read();
         }
+
+        // Reconstruct IMU sensor values from the temporary buffer deterministically
         int16_t ax = (int16_t)(imu_buf[0]  | (imu_buf[1]  << 8));
         int16_t ay = (int16_t)(imu_buf[2]  | (imu_buf[3]  << 8));
         int16_t az = (int16_t)(imu_buf[4]  | (imu_buf[5]  << 8));

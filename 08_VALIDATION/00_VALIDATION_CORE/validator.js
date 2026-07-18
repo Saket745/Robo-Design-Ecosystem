@@ -278,6 +278,86 @@ class Validator {
     return { pass: errors.length === 0, errors, warnings };
   }
 
+  // Custom static quality analysis for C++ files to ensure deterministic evaluation order
+  validateCppQuality(filePath) {
+    const errors = [];
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\n');
+
+      let inBlockComment = false;
+      let inStubBlock = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+
+        // Handle block comments
+        if (inBlockComment) {
+          if (line.includes('*/')) {
+            inBlockComment = false;
+            line = line.substring(line.indexOf('*/') + 2).trim();
+          } else {
+            continue;
+          }
+        }
+        if (line.includes('/*')) {
+          if (line.includes('*/')) {
+            line = line.replace(/\/\*.*?\*\//g, '').trim();
+          } else {
+            inBlockComment = true;
+            line = line.substring(0, line.indexOf('/*')).trim();
+          }
+        }
+
+        // Handle line comments
+        if (line.includes('//')) {
+          line = line.substring(0, line.indexOf('//')).trim();
+        }
+
+        // Handle stub block
+        if (line.startsWith('#if') && line.includes('!defined(ARDUINO)')) {
+          inStubBlock = true;
+        }
+        if (inStubBlock) {
+          if (line.startsWith('#endif')) {
+            inStubBlock = false;
+          }
+          continue;
+        }
+
+        // Ignore stub class/struct definitions and their internal read methods
+        if (line.startsWith('struct TwoWire') || line.startsWith('struct CANClass') || line.startsWith('struct SerialClass')) {
+          continue;
+        }
+        if (line.includes('uint8_t read()')) {
+          continue;
+        }
+
+        // Check for undefined evaluation order hazards
+        if (line.includes('Wire.read()') || line.includes('CAN.read()')) {
+          const bitwiseOperators = ['|', '&', '^', '<<', '>>'];
+          const hasBitwise = bitwiseOperators.some(op => {
+            if (op === '|') {
+              return line.includes('|') && !line.includes('||');
+            }
+            if (op === '&') {
+              return line.includes('&') && !line.includes('&&');
+            }
+            return line.includes(op);
+          });
+
+          if (hasBitwise) {
+            errors.push(`Undefined Evaluation Order Hazard at line ${i + 1}: direct bitwise operation on read call in '${line}'`);
+          }
+        }
+      }
+    } catch (err) {
+      errors.push(`Failed to analyze C++ quality for ${path.relative(root, filePath)}: ${err.message}`);
+    }
+
+    return { pass: errors.length === 0, errors };
+  }
+
   // Execute full validation pipeline on a target
   runPipeline(target, rulesets = ['schema', 'naming', 'dependencies']) {
     const results = {
@@ -296,9 +376,18 @@ class Validator {
         }
       }
 
-      // 2. Schema verification (for yaml/json/configs)
+      // 2. Custom C++ quality and evaluation order checks
+      const ext = path.extname(t).toLowerCase();
+      if (ext === '.cpp' || ext === '.h' || ext === '.ino') {
+        const cppQualityRes = this.validateCppQuality(t);
+        if (!cppQualityRes.pass) {
+          results.pass = false;
+          results.errors.push(...cppQualityRes.errors);
+        }
+      }
+
+      // 3. Schema verification (for yaml/json/configs)
       if (rulesets.includes('schema')) {
-        const ext = path.extname(t).toLowerCase();
         if (ext === '.yaml' || ext === '.yml' || ext === '.json') {
           const basename = path.basename(t);
           let schemaFile = null;
