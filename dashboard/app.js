@@ -388,6 +388,7 @@ function appendConsoleLine(text, type = "info") {
 async function runActualPipeline() {
   const triggerBtn = document.getElementById("btn-trigger-pipeline");
   triggerBtn.disabled = true;
+  triggerBtn.textContent = "⚡ Running Pipeline...";
   
   // Clear console
   document.getElementById("console-output-container").innerHTML = "";
@@ -461,6 +462,7 @@ async function runActualPipeline() {
   }
 
   triggerBtn.disabled = false;
+  triggerBtn.textContent = "Trigger Pipeline Execution";
 }
 
 // Populate Logs Tab
@@ -544,8 +546,12 @@ function setupSearchTab() {
   const newBtn = btn.cloneNode(true);
   btn.parentNode.replaceChild(newBtn, btn);
 
-  newBtn.addEventListener("click", async () => {
-    const query = input.value.trim();
+  // Clone input to avoid multiple keydown listener bindings
+  const newInput = input.cloneNode(true);
+  input.parentNode.replaceChild(newInput, input);
+
+  const performSearch = async () => {
+    const query = newInput.value.trim();
     if (!query) return;
 
     resultsContainer.innerHTML = `
@@ -602,6 +608,15 @@ function setupSearchTab() {
           <p class="description" style="color: var(--accent-crimson);">${err.message}</p>
         </div>
       `;
+    }
+  };
+
+  newBtn.addEventListener("click", performSearch);
+
+  newInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      performSearch();
     }
   });
 }
