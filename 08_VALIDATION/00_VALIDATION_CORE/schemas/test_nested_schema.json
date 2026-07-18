@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "user": {
+      "type": "object",
+      "required": ["id", "profile"],
+      "properties": {
+        "id": { "type": "integer" },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string" }
+          },
+          "required": ["email"]
+        }
+      }
+    }
+  }
+}
