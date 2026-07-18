@@ -110,6 +110,13 @@ const server = http.createServer(async (req, res) => {
         projectId = parsedUrl.query.projectId;
       }
 
+      // Input validation for projectId to prevent path traversal or special character manipulation
+      if (projectId && !/^[a-zA-Z0-9_-]+$/.test(projectId)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: '400 Bad Request: Invalid Project ID format.' }));
+        return;
+      }
+
       if (method === 'GET') {
         realStateManager.initState(projectId);
         const state = realStateManager.getState();
