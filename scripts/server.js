@@ -72,6 +72,17 @@ function parseJsonBody(req) {
   });
 }
 
+async function readFileAsync(filePath) {
+  try {
+    return await fs.promises.readFile(filePath, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return '';
+    }
+    throw err;
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
@@ -179,11 +190,17 @@ const server = http.createServer(async (req, res) => {
       const validationMdPath = path.join(resolvedSkillDir, 'validation.md');
       const dependenciesYamlPath = path.join(resolvedSkillDir, 'dependencies.yaml');
 
+      const [skillMd, validationMd, dependenciesYaml] = await Promise.all([
+        readFileAsync(skillMdPath),
+        readFileAsync(validationMdPath),
+        readFileAsync(dependenciesYamlPath)
+      ]);
+
       const response = {
         id: skillId,
-        skill_md: fs.existsSync(skillMdPath) ? fs.readFileSync(skillMdPath, 'utf8') : '',
-        validation_md: fs.existsSync(validationMdPath) ? fs.readFileSync(validationMdPath, 'utf8') : '',
-        dependencies_yaml: fs.existsSync(dependenciesYamlPath) ? fs.readFileSync(dependenciesYamlPath, 'utf8') : ''
+        skill_md: skillMd,
+        validation_md: validationMd,
+        dependencies_yaml: dependenciesYaml
       };
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
