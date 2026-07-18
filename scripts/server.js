@@ -79,7 +79,11 @@ const server = http.createServer(async (req, res) => {
   const method = req.method;
 
   // Set default CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const envOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [];
+  const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', ...envOrigins].filter(Boolean);
+  const origin = req.headers.origin;
+  const allowedOrigin = allowedOrigins.includes(origin) ? origin : 'http://localhost:3000';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
