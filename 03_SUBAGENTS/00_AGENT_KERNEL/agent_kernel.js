@@ -18,57 +18,7 @@ function validatePath(targetPath) {
   return resolved;
 }
 
-// Custom simple YAML parser for agent yaml definitions (if any)
-function parseYAML(content) {
-  if (!content) return {};
-  const lines = content.split(/\r?\n/);
-  const obj = {};
-  let currentKey = null;
-  let inList = false;
-
-  for (let line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-
-    if (trimmed.startsWith('-')) {
-      if (currentKey && Array.isArray(obj[currentKey])) {
-        let val = trimmed.substring(1).trim();
-        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-          val = val.substring(1, val.length - 1);
-        }
-        obj[currentKey].push(val);
-      }
-      continue;
-    }
-
-    const colonIdx = trimmed.indexOf(':');
-    if (colonIdx !== -1) {
-      const key = trimmed.substring(0, colonIdx).trim();
-      let val = trimmed.substring(colonIdx + 1).trim();
-
-      if (val === '') {
-        currentKey = key;
-        obj[currentKey] = [];
-        inList = true;
-      } else {
-        if (val.startsWith('[') && val.endsWith(']')) {
-          val = val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
-        } else if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-          val = val.substring(1, val.length - 1);
-        } else if (val === 'true') {
-          val = true;
-        } else if (val === 'false') {
-          val = false;
-        } else if (!isNaN(val) && val !== '') {
-          val = Number(val);
-        }
-        obj[key] = val;
-        inList = false;
-      }
-    }
-  }
-  return obj;
-}
+const { parseYAML } = require('../../08_VALIDATION/00_VALIDATION_CORE/yaml_parser');
 
 function validateAgentContract(agentDef) {
   if (!agentDef || typeof agentDef !== 'object') {
