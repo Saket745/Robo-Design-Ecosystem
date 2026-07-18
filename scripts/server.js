@@ -5,6 +5,7 @@ const url = require('url');
 
 // Import ecosystem engines
 const stateManager = require('./state_manager');
+const realStateManager = require('../09_EXECUTION_ENGINE/05_STATE_MANAGER/state_manager');
 const semanticRouter = require('../02_SKILLS/02_AGENTIC_ROUTING/router');
 const orchestrator = require('../03_SUBAGENTS/01_COORDINATION_AGENTS/master_orchestrator/orchestrator');
 const DAGEngine = require('../09_EXECUTION_ENGINE/02_DAG_ENGINE/dag_engine');
@@ -99,14 +100,12 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (method === 'GET') {
-        const realStateManager = require('../09_EXECUTION_ENGINE/05_STATE_MANAGER/state_manager');
         realStateManager.initState(projectId);
         const state = realStateManager.getState();
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(state));
       } else if (method === 'POST') {
         const body = await parseJsonBody(req);
-        const realStateManager = require('../09_EXECUTION_ENGINE/05_STATE_MANAGER/state_manager');
         realStateManager.initState(projectId);
         const nextState = realStateManager.updateState(body);
         
