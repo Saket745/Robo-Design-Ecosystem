@@ -352,6 +352,11 @@ const server = http.createServer(async (req, res) => {
     
     else if (pathname === '/api/logs' && method === 'GET') {
       const logType = parsedUrl.query.type || 'execution';
+      if (logType !== 'audit' && logType !== 'execution') {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid log type. Allowed types are: audit, execution' }));
+        return;
+      }
       const limit = parseInt(parsedUrl.query.limit, 10) || 50;
       let targetLogFile = logsFile;
 
