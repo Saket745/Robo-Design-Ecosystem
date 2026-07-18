@@ -144,7 +144,7 @@ if (require.main === module) {
     message: 'Testing structured logging output.',
     payload: {
       input_file: 'Robot Model.txt',
-      api_key_test: 'secret_oauth_token_12345'
+      api_key_test: process.env.API_KEY_TEST || 'mock_api_key_placeholder'
     }
   });
 
