@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { parseYAML } = require('../../16_CONFIG/yaml_parser');
+const { parseYAML } = require('../../08_VALIDATION/00_VALIDATION_CORE/yaml_parser');
 
 const root = path.resolve(__dirname, '../..');
 const defaultSkillsDir = path.join(root, '02_SKILLS', '04_SKILL_DOMAINS');

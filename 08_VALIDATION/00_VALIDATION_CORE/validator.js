@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { parseYAML } = require('../../16_CONFIG/yaml_parser');
+const { parseYAML } = require('./yaml_parser');
 
 const root = path.resolve(__dirname, '../..');
 
