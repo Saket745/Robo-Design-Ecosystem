@@ -73,7 +73,7 @@ function loadRegistry() {
 }
 
 function routeQuery(queryText) {
-  const registry = loadRegistry();
+  const registry = module.exports.loadRegistry();
   const tokens = queryText.toLowerCase().split(/[\s,_.\-\/]+/);
 
   const scoredSkills = registry.skills.map(skill => {
