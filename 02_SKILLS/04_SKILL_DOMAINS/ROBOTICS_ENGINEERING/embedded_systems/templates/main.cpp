@@ -19,30 +19,31 @@ typedef uint32_t TickType_t;
 typedef void* TaskHandle_t;
 
 #define pdMS_TO_TICKS(ms) (ms)
-#define xTaskCreatePinnedToCore(task, name, stack, params, priority, handle, core)
-#define vTaskDelayUntil(prev, interval)
+#define xTaskCreatePinnedToCore(task, name, stack, params, priority, handle, core) \
+    ((void)(task), (void)(name), (void)(stack), (void)(params), (void)(priority), (void)(handle), (void)(core))
+#define vTaskDelayUntil(prev, interval) ((void)(prev), (void)(interval))
 #define xTaskGetTickCount() (0)
 
-#define ledcWrite(channel, duty)
+#define ledcWrite(channel, duty) ((void)(channel), (void)(duty))
 #define constrain(x, lo, hi) ((x)<(lo)?(lo):((x)>(hi)?(hi):(x)))
-#define map(val, in_min, in_max, out_min, out_max) (0)
-#define pinMode(pin, mode)
-#define digitalWrite(pin, val)
-#define attachInterrupt(pin, isr, mode)
+#define map(val, in_min, in_max, out_min, out_max) ((void)(val), (void)(in_min), (void)(in_max), (void)(out_min), (void)(out_max), 0)
+#define pinMode(pin, mode) ((void)(pin), (void)(mode))
+#define digitalWrite(pin, val) ((void)(pin), (void)(val))
+#define attachInterrupt(pin, isr, mode) ((void)(pin), (void)(isr), (void)(mode))
 #define digitalPinToInterrupt(pin) (pin)
 
 struct TwoWire {
-    void begin(int sda, int scl) {}
-    void beginTransmission(int addr) {}
-    void write(uint8_t val) {}
-    void endTransmission(bool stop = true) {}
-    void requestFrom(int addr, int len) {}
+    void begin(int sda, int scl) { (void)sda; (void)scl; }
+    void beginTransmission(int addr) { (void)addr; }
+    void write(uint8_t val) { (void)val; }
+    void endTransmission(bool stop = true) { (void)stop; }
+    void requestFrom(int addr, int len) { (void)addr; (void)len; }
     uint8_t read() { return 0; }
 } Wire;
 
 struct CANClass {
-    void setPins(int rx, int tx) {}
-    bool begin(long speed) { return true; }
+    void setPins(int rx, int tx) { (void)rx; (void)tx; }
+    bool begin(long speed) { (void)speed; return true; }
     int parsePacket() { return 0; }
     long packetId() { return 0; }
     bool available() { return false; }
@@ -50,10 +51,10 @@ struct CANClass {
 } CAN;
 
 struct SerialClass {
-    void begin(long baud) {}
-    void printf(const char* format, ...) {}
-    void print(const char* msg) {}
-    void println(const char* msg) {}
+    void begin(long baud) { (void)baud; }
+    void printf(const char* format, ...) { (void)format; }
+    void print(const char* msg) { (void)msg; }
+    void println(const char* msg) { (void)msg; }
 } Serial;
 #endif
 
@@ -81,6 +82,7 @@ void IRAM_ATTR estop_isr() {
 
 // Task 1: Poll IMU Sensor (BMI270) at 100Hz
 void SensorTask(void * pvParameters) {
+    (void)pvParameters;
     TickType_t xLastWakeTime = xTaskGetTickCount();
     const TickType_t xFrequency = pdMS_TO_TICKS(10); // 10ms = 100Hz
 
@@ -127,6 +129,7 @@ void SensorTask(void * pvParameters) {
 
 // Task 2: Write PWM commands to motor controllers
 void ControlTask(void * pvParameters) {
+    (void)pvParameters;
     TickType_t xLastWakeTime = xTaskGetTickCount();
     const TickType_t xFrequency = pdMS_TO_TICKS(20); // 20ms = 50Hz (Standard servo PWM)
 
@@ -146,10 +149,8 @@ void ControlTask(void * pvParameters) {
         for (int i = 0; i < 12; i++) {
             // Map target angles in radians to PWM duty cycle counts
             float angle_deg = g_target_angles[i] * 57.2958f;
-            // FIX: Clamp angle to safe servo range BEFORE mapping.
-            // Without constrain(), out-of-range angles produce duty cycles
-            // outside [500,2500]us which can damage servos or exceed
-            // mechanical joint limits defined in robot.urdf.
+            // FIX: Clamp angle to safe servo range BEFORE mapping to avoid out-of-range duty cycles
+            // which can damage physical servos or exceed URDF mechanical joint limits.
             angle_deg = constrain(angle_deg, -90.0f, 90.0f);
             uint32_t duty = map((long)angle_deg, -90, 90, 500, 2500);
             ledcWrite(i, duty);
