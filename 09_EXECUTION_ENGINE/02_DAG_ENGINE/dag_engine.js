@@ -141,6 +141,7 @@ function getExecutionOrder(dag) {
 
   const visited = new Set();
   const order = [];
+  const taskIds = new Set(dag.tasks.map(t => t.id));
 
   const visit = (node) => {
     if (visited.has(node)) return;
@@ -151,7 +152,7 @@ function getExecutionOrder(dag) {
       visit(dep);
     }
     // Only push if the task is defined in tasks (some dependencies might be external/not in tasks list)
-    if (dag.tasks.some(t => t.id === node)) {
+    if (taskIds.has(node)) {
       order.push(node);
     }
   };
@@ -164,9 +165,10 @@ function getExecutionOrder(dag) {
 
 async function executeDAG(dag, executors = {}, context = {}) {
   const order = getExecutionOrder(dag);
+  const taskMap = new Map(dag.tasks.map(t => [t.id, t]));
   
   for (const taskId of order) {
-    const taskDef = dag.tasks.find(t => t.id === taskId);
+    const taskDef = taskMap.get(taskId);
     if (!taskDef) continue;
 
     dag.status[taskId] = 'running';
