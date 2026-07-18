@@ -4,6 +4,8 @@ const path = require('path');
 const root = path.resolve(__dirname, '../..');
 const registryPath = path.join(root, '02_SKILLS', '01_CAPABILITY_REGISTRY', 'master_skill_registry.yaml');
 
+const { parseYAML } = require('../../08_VALIDATION/00_VALIDATION_CORE/yaml_parser');
+
 function validatePath(targetPath) {
   const resolved = path.normalize(path.resolve(targetPath));
   const resolvedRoot = path.normalize(path.resolve(root));
@@ -14,54 +16,6 @@ function validatePath(targetPath) {
   return resolved;
 }
 
-// Simple custom YAML parser to remain dependency-free
-function parseYaml(yamlText) {
-  const lines = yamlText.split('\n');
-  const skills = [];
-  let currentSkill = null;
-  let inList = false;
-  let listKey = null;
-
-  for (let line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-
-    if (trimmed.startsWith('- id:')) {
-      if (currentSkill) {
-        skills.push(currentSkill);
-      }
-      currentSkill = { id: trimmed.replace('- id:', '').trim() };
-      inList = false;
-      continue;
-    }
-
-    if (currentSkill) {
-      const parts = trimmed.split(':');
-      if (parts.length >= 2) {
-        const key = parts[0].trim();
-        let value = parts.slice(1).join(':').trim();
-
-        if (value.startsWith('[') && value.endsWith(']')) {
-          currentSkill[key] = value.slice(1, -1).split(',').map(x => x.trim().replace(/['"]/g, '')).filter(Boolean);
-        } else if (value === '') {
-          inList = true;
-          listKey = key;
-          currentSkill[listKey] = [];
-        } else {
-          currentSkill[key] = value.replace(/['"]/g, '');
-        }
-      } else if (inList && trimmed.startsWith('-')) {
-        const item = trimmed.replace('-', '').trim().replace(/['"]/g, '');
-        currentSkill[listKey].push(item);
-      }
-    }
-  }
-  if (currentSkill) {
-    skills.push(currentSkill);
-  }
-  return { skills };
-}
-
 function loadRegistry() {
   const safeRegistryPath = validatePath(registryPath);
   if (!fs.existsSync(safeRegistryPath)) {
@@ -69,11 +23,11 @@ function loadRegistry() {
     return { skills: [] };
   }
   const text = fs.readFileSync(safeRegistryPath, 'utf8');
-  return parseYaml(text);
+  return parseYAML(text);
 }
 
 function routeQuery(queryText) {
-  const registry = loadRegistry();
+  const registry = module.exports.loadRegistry();
   const tokens = queryText.toLowerCase().split(/[\s,_.\-\/]+/);
 
   const scoredSkills = registry.skills.map(skill => {

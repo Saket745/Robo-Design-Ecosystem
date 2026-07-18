@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "my_int": { "type": "integer" },
+    "my_num": { "type": "number" },
+    "my_bool": { "type": "boolean" },
+    "my_str": { "type": "string" }
+  }
+}

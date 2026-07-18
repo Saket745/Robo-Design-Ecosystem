@@ -12,7 +12,7 @@
     "scaffold": "node scripts/scaffold.js",
     "dev": "vite dashboard --port 3000 --open",
     "validate": "node scripts/validate-ecosystem.js",
-    "test": "node 09_EXECUTION_ENGINE/02_DAG_ENGINE/dag_engine_test.js"
+    "test": "node --test"
   },
   "devDependencies": {
     "vite": "^5.0.0"
