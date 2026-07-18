@@ -364,14 +364,17 @@ const server = http.createServer(async (req, res) => {
         targetLogFile = path.join(rootDir, '12_SYSTEM_LOGS', '01_AUDIT_LOGS', 'audit.jsonl');
       } else if (logType === 'execution') {
         targetLogFile = path.join(rootDir, '12_SYSTEM_LOGS', '02_EXECUTION_LOGS', 'execution.jsonl');
-        if (!fs.existsSync(targetLogFile)) {
+        try {
+          await fs.promises.access(targetLogFile, fs.constants.F_OK);
+        } catch (_) {
           targetLogFile = logsFile;
         }
       }
 
       const logs = [];
-      if (fs.existsSync(targetLogFile)) {
-        const fileContent = fs.readFileSync(targetLogFile, 'utf8');
+      try {
+        await fs.promises.access(targetLogFile, fs.constants.F_OK);
+        const fileContent = await fs.promises.readFile(targetLogFile, 'utf8');
         const lines = fileContent.split('\n');
         for (const line of lines) {
           if (line.trim()) {
@@ -382,6 +385,8 @@ const server = http.createServer(async (req, res) => {
             }
           }
         }
+      } catch (_) {
+        // Handle file-not-found or read errors gracefully
       }
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(logs.reverse().slice(0, limit)));
