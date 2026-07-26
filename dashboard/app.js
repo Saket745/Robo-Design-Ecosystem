@@ -476,8 +476,17 @@ function loadLogsTab() {
 
   newFilterInput.addEventListener("input", async (e) => {
     const val = e.target.value.trim().toLowerCase();
+    const token = localStorage.getItem('admin_logs_token') || '';
     try {
-      const logsRes = await fetch('/api/logs');
+      const logsRes = await fetch('/api/logs', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (logsRes.status === 401) {
+        showLogsAuthPrompt();
+        return;
+      }
       const logsData = await logsRes.json();
       
       if (!val) {
@@ -498,8 +507,19 @@ function loadLogsTab() {
 }
 
 async function fetchLogs() {
+  const token = localStorage.getItem('admin_logs_token') || '';
   try {
-    const res = await fetch('/api/logs');
+    const res = await fetch('/api/logs', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (res.status === 401) {
+      showLogsAuthPrompt();
+      return;
+    }
+
     const data = await res.json();
     renderLogs(data);
   } catch (err) {
@@ -507,6 +527,46 @@ async function fetchLogs() {
       <div class="log-row" style="color: var(--accent-crimson);">Failed to load audit logs: ${err.message}</div>
     `;
   }
+}
+
+function showLogsAuthPrompt() {
+  const container = document.getElementById("logs-list-container");
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center;">
+      <span style="font-size: 32px; margin-bottom: 16px;">🔒</span>
+      <h4 style="margin-bottom: 8px; color: var(--color-text);">Unauthenticated System Logs Access</h4>
+      <p style="font-size: 13px; color: var(--color-text-muted); max-width: 400px; margin-bottom: 20px;">
+        To view structured system logs and audits, please enter the access token specified in your environment variables.
+      </p>
+      <div style="display: flex; gap: 8px; max-width: 360px; width: 100%;">
+        <input type="password" id="logs-auth-token-input" placeholder="Enter Access Token..." style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--color-text); padding: 8px 12px; font-family: var(--font-sans); font-size: 14px;">
+        <button class="btn btn-primary" id="btn-submit-logs-auth" style="padding: 8px 16px;">Access</button>
+      </div>
+      <div id="logs-auth-error" style="color: var(--accent-crimson); font-size: 13px; margin-top: 12px; font-weight: 500;"></div>
+    </div>
+  `;
+
+  document.getElementById("btn-submit-logs-auth").addEventListener("click", () => {
+    const inputVal = document.getElementById("logs-auth-token-input").value.trim();
+    if (inputVal) {
+      localStorage.setItem('admin_logs_token', inputVal);
+      fetchLogs();
+    } else {
+      document.getElementById("logs-auth-error").textContent = "Please enter a valid token.";
+    }
+  });
+
+  document.getElementById("logs-auth-token-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const inputVal = e.target.value.trim();
+      if (inputVal) {
+        localStorage.setItem('admin_logs_token', inputVal);
+        fetchLogs();
+      } else {
+        document.getElementById("logs-auth-error").textContent = "Please enter a valid token.";
+      }
+    }
+  });
 }
 
 function renderLogs(logs) {

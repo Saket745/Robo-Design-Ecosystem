@@ -2,6 +2,41 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const crypto = require('crypto');
+
+// Generate a secure random session token at startup if ADMIN_TOKEN or LOGS_API_KEY is not set
+const SYSTEM_TOKEN = process.env.ADMIN_TOKEN || process.env.LOGS_API_KEY || crypto.randomBytes(32).toString('hex');
+
+// Simple cookie parser helper (retained for backward compatibility or test imports)
+function parseCookies(cookieHeader) {
+  const cookies = {};
+  if (!cookieHeader) return cookies;
+  cookieHeader.split(';').forEach(cookie => {
+    const parts = cookie.split('=');
+    if (parts.length === 2) {
+      cookies[parts[0].trim()] = parts[1].trim();
+    }
+  });
+  return cookies;
+}
+
+function isAuthenticated(req, parsedUrl) {
+  // Check Authorization header (Bearer token)
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7).trim();
+    if (token === SYSTEM_TOKEN) return true;
+  }
+
+  // Check custom X-API-Key header
+  const apiKeyHeader = req.headers['x-api-key'] || req.headers['X-API-Key'];
+  if (apiKeyHeader && apiKeyHeader.trim() === SYSTEM_TOKEN) return true;
+
+  // Check query parameter
+  if (parsedUrl.query && parsedUrl.query.token === SYSTEM_TOKEN) return true;
+
+  return false;
+}
 
 // Import ecosystem engines
 const stateManager = require('./state_manager');
@@ -376,6 +411,11 @@ const server = http.createServer(async (req, res) => {
     } 
     
     else if (pathname === '/api/logs' && method === 'GET') {
+      if (!isAuthenticated(req, parsedUrl)) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Unauthorized: Authentication required to access system logs.' }));
+        return;
+      }
       const logType = parsedUrl.query.type || 'execution';
       if (logType !== 'audit' && logType !== 'execution') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -484,11 +524,18 @@ if (require.main === module) {
     console.log(`Antigravity Robotics Ecosystem Server is LIVE!`);
     console.log(`Access the interactive dashboard at:`);
     console.log(`👉 http://localhost:${PORT}`);
+    if (!process.env.ADMIN_TOKEN && !process.env.LOGS_API_KEY) {
+      console.log(`🔑 Generated secure logs token for this session:`);
+      console.log(`👉 ${SYSTEM_TOKEN}`);
+    }
     console.log(`==================================================`);
   });
 }
 
 module.exports = {
   parseJsonBody,
-  server
+  server,
+  SYSTEM_TOKEN,
+  parseCookies,
+  isAuthenticated
 };

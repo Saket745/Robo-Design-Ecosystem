@@ -20,10 +20,16 @@ function killPortProcess() {
   }
 }
 
+const TEST_TOKEN = 'test_secret_token_12345';
+
 // Function to make HTTP requests
-function makeRequest(path) {
+function makeRequest(path, headers = {}) {
   return new Promise((resolve, reject) => {
-    http.get(`http://localhost:${PORT}${path}`, (res) => {
+    const url = `http://localhost:${PORT}${path}`;
+    const options = {
+      headers: headers
+    };
+    http.get(url, options, (res) => {
       let data = '';
       res.on('data', (chunk) => {
         data += chunk;
@@ -47,6 +53,7 @@ async function runTests() {
 
   console.log('Spawning server process...');
   const serverProc = spawn('node', ['scripts/server.js'], {
+    env: { ...process.env, ADMIN_TOKEN: TEST_TOKEN },
     stdio: 'inherit',
     detached: false
   });
@@ -57,39 +64,99 @@ async function runTests() {
   let failed = false;
 
   try {
-    // Test 1: Default logs endpoint (no type parameter) -> should default to 'execution' and succeed (200)
-    console.log('\n[Test 1] Fetching default /api/logs...');
+    // Test 1: Default logs endpoint (no type parameter, unauthenticated) -> should fail (401)
+    console.log('\n[Test 1] Fetching default /api/logs unauthenticated...');
     const res1 = await makeRequest('/api/logs');
-    if (res1.statusCode === 200) {
-      console.log('✅ Test 1 Passed: Successfully fetched logs (200 OK)');
+    if (res1.statusCode === 401) {
+      console.log('✅ Test 1 Passed: Unauthenticated request to /api/logs was blocked with 401 Unauthorized');
     } else {
-      console.error(`❌ Test 1 Failed: Expected status 200, got ${res1.statusCode}`);
+      console.error(`❌ Test 1 Failed: Expected status 401, got ${res1.statusCode}`);
       failed = true;
     }
 
-    // Test 2: Valid logs type 'execution' -> should succeed (200)
-    console.log('\n[Test 2] Fetching /api/logs?type=execution...');
+    // Test 1b: Default logs endpoint (authenticated with Bearer token) -> should succeed (200)
+    console.log('\n[Test 1b] Fetching default /api/logs with Bearer token...');
+    const res1b = await makeRequest('/api/logs', { 'Authorization': `Bearer ${TEST_TOKEN}` });
+    if (res1b.statusCode === 200) {
+      console.log('✅ Test 1b Passed: Authenticated Bearer request to /api/logs succeeded with 200 OK');
+    } else {
+      console.error(`❌ Test 1b Failed: Expected status 200, got ${res1b.statusCode}`);
+      failed = true;
+    }
+
+    // Test 1c: Default logs endpoint (attempt with cookie) -> should fail (401) for defense-in-depth secure design
+    console.log('\n[Test 1c] Fetching default /api/logs with Session Cookie...');
+    const res1c = await makeRequest('/api/logs', { 'Cookie': `session_token=${TEST_TOKEN}` });
+    if (res1c.statusCode === 401) {
+      console.log('✅ Test 1c Passed: Cookie alone was correctly ignored, requiring stronger headers (401 Unauthorized)');
+    } else {
+      console.error(`❌ Test 1c Failed: Expected status 401, got ${res1c.statusCode}`);
+      failed = true;
+    }
+
+    // Test 1d: Default logs endpoint (authenticated with X-API-Key) -> should succeed (200)
+    console.log('\n[Test 1d] Fetching default /api/logs with X-API-Key...');
+    const res1d = await makeRequest('/api/logs', { 'X-API-Key': TEST_TOKEN });
+    if (res1d.statusCode === 200) {
+      console.log('✅ Test 1d Passed: Authenticated X-API-Key request to /api/logs succeeded with 200 OK');
+    } else {
+      console.error(`❌ Test 1d Failed: Expected status 200, got ${res1d.statusCode}`);
+      failed = true;
+    }
+
+    // Test 1e: Default logs endpoint (authenticated with query parameter) -> should succeed (200)
+    console.log('\n[Test 1e] Fetching default /api/logs with query token...');
+    const res1e = await makeRequest(`/api/logs?token=${TEST_TOKEN}`);
+    if (res1e.statusCode === 200) {
+      console.log('✅ Test 1e Passed: Authenticated query param token request to /api/logs succeeded with 200 OK');
+    } else {
+      console.error(`❌ Test 1e Failed: Expected status 200, got ${res1e.statusCode}`);
+      failed = true;
+    }
+
+    // Test 2: Valid logs type 'execution' (unauthenticated) -> should fail (401)
+    console.log('\n[Test 2] Fetching /api/logs?type=execution unauthenticated...');
     const res2 = await makeRequest('/api/logs?type=execution');
-    if (res2.statusCode === 200) {
-      console.log('✅ Test 2 Passed: Successfully fetched execution logs (200 OK)');
+    if (res2.statusCode === 401) {
+      console.log('✅ Test 2 Passed: Unauthenticated request to execution logs was blocked with 401 Unauthorized');
     } else {
-      console.error(`❌ Test 2 Failed: Expected status 200, got ${res2.statusCode}`);
+      console.error(`❌ Test 2 Failed: Expected status 401, got ${res2.statusCode}`);
       failed = true;
     }
 
-    // Test 3: Valid logs type 'audit' -> should succeed (200)
-    console.log('\n[Test 3] Fetching /api/logs?type=audit...');
+    // Test 2b: Valid logs type 'execution' (authenticated) -> should succeed (200)
+    console.log('\n[Test 2b] Fetching /api/logs?type=execution authenticated...');
+    const res2b = await makeRequest(`/api/logs?type=execution&token=${TEST_TOKEN}`);
+    if (res2b.statusCode === 200) {
+      console.log('✅ Test 2b Passed: Authenticated request to execution logs succeeded (200 OK)');
+    } else {
+      console.error(`❌ Test 2b Failed: Expected status 200, got ${res2b.statusCode}`);
+      failed = true;
+    }
+
+    // Test 3: Valid logs type 'audit' (unauthenticated) -> should fail (401)
+    console.log('\n[Test 3] Fetching /api/logs?type=audit unauthenticated...');
     const res3 = await makeRequest('/api/logs?type=audit');
-    if (res3.statusCode === 200) {
-      console.log('✅ Test 3 Passed: Successfully fetched audit logs (200 OK)');
+    if (res3.statusCode === 401) {
+      console.log('✅ Test 3 Passed: Unauthenticated request to audit logs was blocked with 401 Unauthorized');
     } else {
-      console.error(`❌ Test 3 Failed: Expected status 200, got ${res3.statusCode}`);
+      console.error(`❌ Test 3 Failed: Expected status 401, got ${res3.statusCode}`);
       failed = true;
     }
 
-    // Test 4: Invalid logs type 'invalid_type' -> should fail with 400 Bad Request
-    console.log('\n[Test 4] Fetching /api/logs?type=invalid_type...');
-    const res4 = await makeRequest('/api/logs?type=invalid_type');
+    // Test 3b: Valid logs type 'audit' (authenticated) -> should succeed (200)
+    console.log('\n[Test 3b] Fetching /api/logs?type=audit authenticated...');
+    const res3b = await makeRequest(`/api/logs?type=audit&token=${TEST_TOKEN}`);
+    if (res3b.statusCode === 200) {
+      console.log('✅ Test 3b Passed: Authenticated request to audit logs succeeded (200 OK)');
+    } else {
+      console.error(`❌ Test 3b Failed: Expected status 200, got ${res3b.statusCode}`);
+      failed = true;
+    }
+
+    // Test 4: Invalid logs type 'invalid_type' -> should fail with 400 Bad Request if authenticated
+    console.log('\n[Test 4] Fetching /api/logs?type=invalid_type with valid auth...');
+    const res4 = await makeRequest(`/api/logs?type=invalid_type&token=${TEST_TOKEN}`);
     if (res4.statusCode === 400) {
       const body = JSON.parse(res4.body);
       if (body.success === false && body.error.includes('Invalid log type')) {
@@ -103,9 +170,9 @@ async function runTests() {
       failed = true;
     }
 
-    // Test 5: Malicious traversal parameter '../etc/passwd' -> should fail with 400 Bad Request
-    console.log('\n[Test 5] Fetching /api/logs?type=../etc/passwd...');
-    const res5 = await makeRequest('/api/logs?type=../etc/passwd');
+    // Test 5: Malicious traversal parameter '../etc/passwd' -> should fail with 400 Bad Request if authenticated
+    console.log('\n[Test 5] Fetching /api/logs?type=../etc/passwd with valid auth...');
+    const res5 = await makeRequest(`/api/logs?type=../etc/passwd&token=${TEST_TOKEN}`);
     if (res5.statusCode === 400) {
       const body = JSON.parse(res5.body);
       if (body.success === false && body.error.includes('Invalid log type')) {
