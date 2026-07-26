@@ -198,31 +198,43 @@ function ensureDir(dirPath) {
   }
 }
 
-// Ensure root scripts folder exists
-ensureDir(path.resolve(root, 'scripts'));
+function runScaffold() {
+  // Ensure root scripts folder exists
+  ensureDir(path.resolve(root, 'scripts'));
 
-// Process structure
-for (const [folder, config] of Object.entries(structure)) {
-  const folderPath = validatePath(path.resolve(root, folder));
-  ensureDir(folderPath);
+  // Process structure
+  for (const [folder, config] of Object.entries(structure)) {
+    const folderPath = validatePath(path.resolve(root, folder));
+    ensureDir(folderPath);
 
-  if (config.dirs) {
-    for (const subDir of config.dirs) {
-      const subDirPath = validatePath(path.resolve(folderPath, subDir));
-      ensureDir(subDirPath);
-      // Write .gitkeep inside empty subdirectories
-      const gitkeepPath = validatePath(path.resolve(subDirPath, '.gitkeep'));
-      fs.writeFileSync(gitkeepPath, '');
+    if (config.dirs) {
+      for (const subDir of config.dirs) {
+        const subDirPath = validatePath(path.resolve(folderPath, subDir));
+        ensureDir(subDirPath);
+        // Write .gitkeep inside empty subdirectories
+        const gitkeepPath = validatePath(path.resolve(subDirPath, '.gitkeep'));
+        fs.writeFileSync(gitkeepPath, '');
+      }
+    }
+
+    if (config.files) {
+      for (const [fileName, fileContent] of Object.entries(config.files)) {
+        const filePath = validatePath(path.resolve(folderPath, fileName));
+        fs.writeFileSync(filePath, fileContent);
+      }
     }
   }
 
-  if (config.files) {
-    for (const [fileName, fileContent] of Object.entries(config.files)) {
-      const filePath = validatePath(path.resolve(folderPath, fileName));
-      fs.writeFileSync(filePath, fileContent);
-    }
-  }
+  console.log('Ecosystem scaffold generation complete.');
 }
 
+if (require.main === module) {
+  runScaffold();
+}
 
-console.log('Ecosystem scaffold generation complete.');
+module.exports = {
+  validatePath,
+  ensureDir,
+  runScaffold,
+  root
+};
