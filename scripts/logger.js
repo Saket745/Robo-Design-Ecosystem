@@ -129,6 +129,7 @@ function logEvent({ event, trace_id, severity = 'info', agent = 'system', projec
 
 module.exports = {
   logEvent,
+  validatePath,
   // Re-export structured loggers for direct access
   auditLogger,
   executionLogger
