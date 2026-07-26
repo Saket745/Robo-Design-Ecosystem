@@ -93,7 +93,7 @@ function logEvent({ event, trace_id, severity = 'info', agent = 'system', projec
       trace_id || event,
       event,
       severity === 'error' || severity === 'critical' ? 'failed' : 'completed',
-      { agent, project, message, ...payload }
+      { agent, project, message, ...logEntry.payload }
     );
   } catch (_) {
     // Silently handle — the legacy log was already written
@@ -108,7 +108,7 @@ function logEvent({ event, trace_id, severity = 'info', agent = 'system', projec
 
   if (isAuditWorthy) {
     try {
-      auditLogger.logAudit(event, agent, project, { trace_id, message, severity, ...payload });
+      auditLogger.logAudit(event, agent, project, { trace_id, message, severity, ...logEntry.payload });
     } catch (_) {
       // Silently handle — primary logs were already written
     }
@@ -129,6 +129,7 @@ function logEvent({ event, trace_id, severity = 'info', agent = 'system', projec
 
 module.exports = {
   logEvent,
+  sanitize,
   // Re-export structured loggers for direct access
   auditLogger,
   executionLogger
