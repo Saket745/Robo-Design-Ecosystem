@@ -430,27 +430,27 @@ const server = http.createServer(async (req, res) => {
         /id_rsa/
       ];
       const hygieneIssues = [];
-      function walkDir(dir) {
-        fs.readdirSync(dir).forEach(f => {
-          const dirPath = path.join(dir, f);
-          const isDirectory = fs.statSync(dirPath).isDirectory();
+      async function walkDir(dir) {
+        const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+        await Promise.all(entries.map(async entry => {
+          const f = entry.name;
           if (f === 'node_modules' || f === '.git' || f === '17_SECRETS' || f === '13_BACKUPS') {
             return;
           }
-          if (isDirectory) {
-            walkDir(dirPath);
+          const dirPath = path.join(dir, f);
+          if (entry.isDirectory()) {
+            await walkDir(dirPath);
           } else {
-            const basename = path.basename(dirPath);
             forbiddenPatterns.forEach(pattern => {
-              if (pattern.test(basename)) {
+              if (pattern.test(f)) {
                 hygieneIssues.push(`Security Violation: Forbidden file pattern detected: ${path.relative(rootDir, dirPath)}`);
               }
             });
           }
-        });
+        }));
       }
       try {
-        walkDir(rootDir);
+        await walkDir(rootDir);
       } catch (err) {
         hygieneIssues.push(`Hygiene scan failed: ${err.message}`);
       }
