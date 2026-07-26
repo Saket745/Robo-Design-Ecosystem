@@ -15,13 +15,16 @@ async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function runDemo() {
+/**
+ * STEP 1: State Initialization
+ * Clears terminal, prints demo header, and logs start event.
+ */
+async function initDemoState() {
   console.clear();
   console.log('\x1b[36m======================================================================\x1b[0m');
   console.log('\x1b[36m             ANTIGRAVITY AUTONOMOUS ECOSYSTEM DEMO RUN                \x1b[0m');
   console.log('\x1b[36m======================================================================\x1b[0m\n');
 
-  // STEP 1: State Initialization
   logger.logEvent({
     event: 'demo_start',
     trace_id: traceId,
@@ -29,8 +32,13 @@ async function runDemo() {
     message: 'Initializing Antigravity platform demo execution.'
   });
   await sleep(1000);
+}
 
-  // STEP 2: Document Intake and Parameter Extraction
+/**
+ * STEP 2: Document Intake and Parameter Extraction
+ * Parses text documents to extract structured specs.
+ */
+async function runDocumentIntake() {
   console.log('\n\x1b[33m--- STEP 2: Document Intelligence Intake ---\x1b[0m');
   const sampleDocs = [
     path.join(root, '..', '_extracted_text', 'Robot Model.txt'),
@@ -44,11 +52,16 @@ async function runDemo() {
     message: `Orchestrating parallel parsing of ${sampleDocs.length} spec documents.`
   });
 
-  const orchestrateResult = await orchestrator.orchestrateDocs(sampleDocs);
+  await orchestrator.orchestrateDocs(sampleDocs);
   console.log(`\x1b[32m✔ Consolidated configurations written to active projects state.\x1b[0m`);
   await sleep(1500);
+}
 
-  // STEP 3: Semantic Capability Router
+/**
+ * STEP 3: Semantic Capability Router
+ * Routes semantic query to best-matched capability in registry.
+ */
+async function runSemanticRouting() {
   console.log('\n\x1b[33m--- STEP 3: Agentic Routing & Search ---\x1b[0m');
   const searchQuery = 'Compute inverse kinematics trajectories for quadruped limbs';
   console.log(`Query: "${searchQuery}"`);
@@ -61,8 +74,13 @@ async function runDemo() {
   });
   console.log(`Matched Skill Entrypoint: \x1b[34m${routeResult.matched_skill.entrypoint}\x1b[0m`);
   await sleep(1500);
+}
 
-  // STEP 4: DAG Generation and Topological Sort
+/**
+ * STEP 4: DAG Generation and Topological Sort
+ * Formulates execution graph and sorts phases.
+ */
+async function runDAGPlanning() {
   console.log('\n\x1b[33m--- STEP 4: Execution Planning (DAG Engine) ---\x1b[0m');
   const dag = new DAGEngine();
   dag.addNode('Requirements', []);
@@ -82,8 +100,13 @@ async function runDemo() {
   console.log('Execution Order of Engineering Phases:');
   console.log(`\x1b[32m${order.join(' ➔ ')}\x1b[0m`);
   await sleep(1500);
+}
 
-  // STEP 5: Physical Safety Validation
+/**
+ * STEP 5: Physical Safety Validation
+ * Evaluates core system limitations and constraints.
+ */
+async function runSafetyValidation() {
   console.log('\n\x1b[33m--- STEP 5: Robotics Safety Validation Pipeline ---\x1b[0m');
   const targetConstraints = {
     trace_id: traceId,
@@ -107,8 +130,13 @@ async function runDemo() {
     console.log('\x1b[31m❌ FAIL: Safety constraints violated.\x1b[0m');
   }
   await sleep(1500);
+}
 
-  // STEP 6: Final State Audit
+/**
+ * STEP 6: Final State Audit
+ * Audits post-execution states and displays run completion banner.
+ */
+async function runStateAudit() {
   console.log('\n\x1b[33m--- STEP 6: Persistent State Audit ---\x1b[0m');
   const finalState = stateManager.getState();
   console.log('Current Project State:');
@@ -117,6 +145,18 @@ async function runDemo() {
   console.log('\n\x1b[36m======================================================================\x1b[0m');
   console.log('\x1b[36m                    DEMO COMPLETED SUCCESSFULLY                       \x1b[0m');
   console.log('\x1b[36m======================================================================\x1b[0m');
+}
+
+/**
+ * Main coordinator function that executes the entire Antigravity platform demo.
+ */
+async function runDemo() {
+  await initDemoState();
+  await runDocumentIntake();
+  await runSemanticRouting();
+  await runDAGPlanning();
+  await runSafetyValidation();
+  await runStateAudit();
 }
 
 if (require.main === module) {
