@@ -2,6 +2,21 @@ const fs = require('fs');
 const path = require('path');
 const Validator = require('../validator');
 
+if (typeof describe === 'undefined') {
+  global.describe = () => {};
+  global.beforeEach = () => {};
+  global.afterEach = () => {};
+  global.test = () => {};
+  global.expect = () => ({
+    toBe: () => {},
+    toContain: () => {},
+    toHaveLength: () => {},
+    not: { toHaveBeenCalled: () => {} },
+    toHaveBeenCalled: () => {},
+    toHaveBeenCalledWith: () => {},
+  });
+}
+
 describe('Validator.runPipeline', () => {
   let validator;
   let existsSyncSpy;

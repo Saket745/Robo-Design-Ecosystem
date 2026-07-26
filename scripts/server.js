@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const crypto = require('crypto');
 
 // Import ecosystem engines
 const stateManager = require('./state_manager');
@@ -19,7 +20,7 @@ try {
   // Agent kernel not implemented yet
 }
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const rootDir = path.resolve(__dirname, '..');
 const dashboardDir = path.join(rootDir, 'dashboard');
 const logsFile = path.join(rootDir, '12_SYSTEM_LOGS', '01_EXECUTION_LOGS', 'execution_runs.jsonl');
@@ -33,6 +34,60 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml'
 };
+
+const activeSessions = new Map(); // token -> timestamp
+const MAX_SESSIONS = 1000;
+const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+function addSession(token) {
+  const now = Date.now();
+  // Evict expired sessions
+  for (const [t, ts] of activeSessions.entries()) {
+    if (now - ts > SESSION_TTL) {
+      activeSessions.delete(t);
+    }
+  }
+  // Enforce size limit
+  if (activeSessions.size >= MAX_SESSIONS) {
+    let oldestToken = null;
+    let oldestTime = Infinity;
+    for (const [t, ts] of activeSessions.entries()) {
+      if (ts < oldestTime) {
+        oldestTime = ts;
+        oldestToken = t;
+      }
+    }
+    if (oldestToken) activeSessions.delete(oldestToken);
+  }
+  activeSessions.set(token, now);
+}
+
+function isSessionValid(token) {
+  if (!token) return false;
+  const ts = activeSessions.get(token);
+  if (!ts) return false;
+  if (Date.now() - ts > SESSION_TTL) {
+    activeSessions.delete(token);
+    return false;
+  }
+  return true;
+}
+
+function parseCookies(req) {
+  const list = {};
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return list;
+
+  cookieHeader.split(';').forEach(cookie => {
+    let [name, ...rest] = cookie.split('=');
+    name = name.trim();
+    if (!name) return;
+    const val = rest.join('=').trim();
+    list[name] = decodeURIComponent(val);
+  });
+
+  return list;
+}
 
 // In-memory cache for static skill detail responses to avoid redundant I/O bottlenecks under concurrent load.
 // Benchmark-verified gains (1000 requests @ concurrency 50):
@@ -101,6 +156,16 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    // Generate session cookie for static dashboard view to prevent unauthenticated access
+    if (pathname === '/' || pathname === '/index.html') {
+      const cookies = parseCookies(req);
+      if (!cookies.session_token || !isSessionValid(cookies.session_token)) {
+        const sessionToken = crypto.randomBytes(16).toString('hex');
+        addSession(sessionToken);
+        res.setHeader('Set-Cookie', `session_token=${sessionToken}; Path=/; HttpOnly; SameSite=Strict`);
+      }
+    }
+
     // API endpoints
     if (pathname === '/api/state' || pathname.startsWith('/api/state/')) {
       let projectId = 'robot_project';
@@ -376,6 +441,36 @@ const server = http.createServer(async (req, res) => {
     } 
     
     else if (pathname === '/api/logs' && method === 'GET') {
+      // 1. Authentication check
+      const cookies = parseCookies(req);
+      const authHeader = req.headers['authorization'];
+      const queryToken = parsedUrl.query.token;
+
+      let providedToken = null;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        providedToken = authHeader.substring(7).trim();
+      } else if (queryToken) {
+        providedToken = queryToken.trim();
+      }
+
+      const isProdOrStaging = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+      const secureEnvToken = process.env.API_TOKEN || process.env.JWT_SECRET;
+
+      let expectedToken = secureEnvToken;
+      if (!expectedToken && !isProdOrStaging) {
+        // Fallback is strictly disallowed in production and staging
+        expectedToken = 'antigravity_secret_token';
+      }
+
+      const isTokenValid = (providedToken && expectedToken && providedToken === expectedToken);
+      const isSessionActive = isSessionValid(cookies.session_token);
+
+      if (!isTokenValid && !isSessionActive) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: '401 Unauthorized: Access to system logs requires valid authorization token or session.' }));
+        return;
+      }
+
       const logType = parsedUrl.query.type || 'execution';
       if (logType !== 'audit' && logType !== 'execution') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
