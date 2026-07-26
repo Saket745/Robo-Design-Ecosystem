@@ -1,5 +1,5 @@
 const http = require('http');
-const { exec } = require('child_process');
+const childProcess = require('child_process');
 const path = require('path');
 
 function makeRequests(url, count, concurrency) {
@@ -45,18 +45,18 @@ function makeRequests(url, count, concurrency) {
 
 async function run() {
   console.log('Running real HTTP request benchmark...');
-  const serverProcess = exec('node scripts/server.js');
+  const serverProcess = childProcess.exec('node scripts/server.js');
 
   // Wait for server to start
   await new Promise(r => setTimeout(r, 1000));
 
   const url = 'http://localhost:3000/api/skill-detail?id=bom_procurement';
   console.log('Warming up server...');
-  await makeRequests(url, 100, 10);
+  await module.exports.makeRequests(url, 100, 10);
 
   console.log('Starting benchmark (1000 requests, concurrency 50)...');
   const start = process.hrtime.bigint();
-  const latencies = await makeRequests(url, 1000, 50);
+  const latencies = await module.exports.makeRequests(url, 1000, 50);
   const end = process.hrtime.bigint();
   const durationMs = Number(end - start) / 1e6;
 
@@ -64,6 +64,7 @@ async function run() {
     console.error('No latencies recorded. Requests might have failed.');
     serverProcess.kill('SIGTERM');
     process.exit(1);
+    return;
   }
 
   latencies.sort((a, b) => a - b);
@@ -85,7 +86,14 @@ async function run() {
   process.exit(0);
 }
 
-run().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  makeRequests,
+  run
+};
