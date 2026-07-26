@@ -80,6 +80,32 @@ function parseJsonBody(req) {
   });
 }
 
+/**
+ * Generates mock validation data for a given pipeline phase based on current state.
+ * @param {string} phase
+ * @param {object} state
+ * @returns {object}
+ */
+function getTestDataForPhase(phase, state = {}) {
+  const testData = { trace_id: 'pipeline_run' };
+
+  if (phase === 'CAD') {
+    testData.dimensions = state.mobility || 'Legged';
+    testData.weight_kg = 5.2; // Under the 10kg limit
+  } else if (phase === 'PCB') {
+    testData.voltage = 12; // Under 24V limit
+    testData.mcu = state.compute_system || 'ESP32';
+  } else if (phase === 'Validation') {
+    testData.motor_runaway_protection = true;
+    testData.max_cell_voltage = 4.2;
+    testData.min_cell_voltage = 3.1;
+    testData.max_temperature_c = 65;
+    testData.emergency_stop_implemented = true;
+  }
+
+  return testData;
+}
+
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
@@ -302,20 +328,7 @@ const server = http.createServer(async (req, res) => {
         executionLogs.push(`Starting task: ${phase}...`);
         
         // Mock data to feed into validation pipeline
-        let testData = { trace_id: 'pipeline_run' };
-        if (phase === 'CAD') {
-          testData.dimensions = state.mobility || 'Legged';
-          testData.weight_kg = 5.2; // Under the 10kg limit
-        } else if (phase === 'PCB') {
-          testData.voltage = 12; // Under 24V limit
-          testData.mcu = state.compute_system || 'ESP32';
-        } else if (phase === 'Validation') {
-          testData.motor_runaway_protection = true;
-          testData.max_cell_voltage = 4.2;
-          testData.min_cell_voltage = 3.1;
-          testData.max_temperature_c = 65;
-          testData.emergency_stop_implemented = true;
-        }
+        const testData = getTestDataForPhase(phase, state);
 
         const skillId = phaseToSkill[phase];
         let valResult = { passed: true, issues: [] };
@@ -430,27 +443,27 @@ const server = http.createServer(async (req, res) => {
         /id_rsa/
       ];
       const hygieneIssues = [];
-      function walkDir(dir) {
-        fs.readdirSync(dir).forEach(f => {
-          const dirPath = path.join(dir, f);
-          const isDirectory = fs.statSync(dirPath).isDirectory();
+      async function walkDir(dir) {
+        const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+        await Promise.all(entries.map(async entry => {
+          const f = entry.name;
           if (f === 'node_modules' || f === '.git' || f === '17_SECRETS' || f === '13_BACKUPS') {
             return;
           }
-          if (isDirectory) {
-            walkDir(dirPath);
+          const dirPath = path.join(dir, f);
+          if (entry.isDirectory()) {
+            await walkDir(dirPath);
           } else {
-            const basename = path.basename(dirPath);
             forbiddenPatterns.forEach(pattern => {
-              if (pattern.test(basename)) {
+              if (pattern.test(f)) {
                 hygieneIssues.push(`Security Violation: Forbidden file pattern detected: ${path.relative(rootDir, dirPath)}`);
               }
             });
           }
-        });
+        }));
       }
       try {
-        walkDir(rootDir);
+        await walkDir(rootDir);
       } catch (err) {
         hygieneIssues.push(`Hygiene scan failed: ${err.message}`);
       }
@@ -490,5 +503,6 @@ if (require.main === module) {
 
 module.exports = {
   parseJsonBody,
+  getTestDataForPhase,
   server
 };

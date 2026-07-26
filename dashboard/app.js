@@ -429,7 +429,7 @@ async function runActualPipeline() {
         statusText.textContent = "RUNNING";
         
         appendConsoleLine(`Verifying node: ${phase}...`, "info");
-        await new Promise(r => setTimeout(r, 800)); // Sleek micro-delay for visual aesthetic
+        await new Promise(r => setTimeout(r, 50)); // Sleek micro-delay for visual aesthetic
         
         const status = data.steps[phase];
         if (status === 'SUCCESS') {
