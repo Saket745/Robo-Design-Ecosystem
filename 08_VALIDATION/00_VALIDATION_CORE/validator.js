@@ -41,62 +41,89 @@ class Validator {
     }
 
     const errors = [];
-    const validate = (val, sch, currentPath = '') => {
-      if (!sch) return;
 
-      const expectedType = sch.type;
-      if (expectedType) {
-        if (expectedType === 'array') {
-          if (!Array.isArray(val)) {
-            errors.push(`Property '${currentPath}' must be of type 'array', got '${typeof val}'`);
-            return;
+    const validateArray = (val, sch, currentPath, validateFn) => {
+      if (!Array.isArray(val)) {
+        errors.push(`Property '${currentPath}' must be of type 'array', got '${typeof val}'`);
+        return;
+      }
+      if (sch.items) {
+        val.forEach((item, index) => {
+          validateFn(item, sch.items, `${currentPath}[${index}]`);
+        });
+      }
+    };
+
+    const validateObject = (val, sch, currentPath, validateFn) => {
+      if (typeof val !== 'object' || val === null || Array.isArray(val)) {
+        errors.push(`Property '${currentPath}' must be of type 'object', got '${typeof val}'`);
+        return;
+      }
+      if (sch.required && Array.isArray(sch.required)) {
+        sch.required.forEach(reqKey => {
+          if (val[reqKey] === undefined) {
+            errors.push(`Property '${currentPath ? currentPath + '.' : ''}${reqKey}' is required`);
           }
-          if (sch.items) {
-            val.forEach((item, index) => {
-              validate(item, sch.items, `${currentPath}[${index}]`);
-            });
+        });
+      }
+      if (sch.properties) {
+        for (const propKey in sch.properties) {
+          if (val[propKey] !== undefined) {
+            validateFn(val[propKey], sch.properties[propKey], `${currentPath ? currentPath + '.' : ''}${propKey}`);
           }
-        } else if (expectedType === 'object') {
-          if (typeof val !== 'object' || val === null || Array.isArray(val)) {
-            errors.push(`Property '${currentPath}' must be of type 'object', got '${typeof val}'`);
-            return;
-          }
-          if (sch.required && Array.isArray(sch.required)) {
-            sch.required.forEach(reqKey => {
-              if (val[reqKey] === undefined) {
-                errors.push(`Property '${currentPath ? currentPath + '.' : ''}${reqKey}' is required`);
-              }
-            });
-          }
-          if (sch.properties) {
-            for (const propKey in sch.properties) {
-              if (val[propKey] !== undefined) {
-                validate(val[propKey], sch.properties[propKey], `${currentPath ? currentPath + '.' : ''}${propKey}`);
-              }
-            }
-          }
-        } else if (expectedType === 'integer') {
+        }
+      }
+    };
+
+    const validateString = (val, sch, currentPath) => {
+      if (typeof val !== 'string') {
+        errors.push(`Property '${currentPath}' must be of type 'string', got '${typeof val}'`);
+      } else if (sch.pattern) {
+        const regex = new RegExp(sch.pattern);
+        if (!regex.test(val)) {
+          errors.push(`Property '${currentPath}' value '${val}' does not match pattern '${sch.pattern}'`);
+        }
+      }
+    };
+
+    const validatePrimitive = (val, expectedType, currentPath) => {
+      switch (expectedType) {
+        case 'integer':
           if (!Number.isInteger(val)) {
             errors.push(`Property '${currentPath}' must be of type 'integer', got '${typeof val}'`);
           }
-        } else if (expectedType === 'number') {
+          break;
+        case 'number':
           if (typeof val !== 'number' || isNaN(val)) {
             errors.push(`Property '${currentPath}' must be of type 'number', got '${typeof val}'`);
           }
-        } else if (expectedType === 'boolean') {
+          break;
+        case 'boolean':
           if (typeof val !== 'boolean') {
             errors.push(`Property '${currentPath}' must be of type 'boolean', got '${typeof val}'`);
           }
-        } else if (expectedType === 'string') {
-          if (typeof val !== 'string') {
-            errors.push(`Property '${currentPath}' must be of type 'string', got '${typeof val}'`);
-          } else if (sch.pattern) {
-            const regex = new RegExp(sch.pattern);
-            if (!regex.test(val)) {
-              errors.push(`Property '${currentPath}' value '${val}' does not match pattern '${sch.pattern}'`);
-            }
-          }
-        }
+          break;
+      }
+    };
+
+    const validate = (val, sch, currentPath = '') => {
+      if (!sch || !sch.type) return;
+
+      switch (sch.type) {
+        case 'array':
+          validateArray(val, sch, currentPath, validate);
+          break;
+        case 'object':
+          validateObject(val, sch, currentPath, validate);
+          break;
+        case 'string':
+          validateString(val, sch, currentPath);
+          break;
+        case 'integer':
+        case 'number':
+        case 'boolean':
+          validatePrimitive(val, sch.type, currentPath);
+          break;
       }
     };
 
