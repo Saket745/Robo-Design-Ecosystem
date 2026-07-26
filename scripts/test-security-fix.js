@@ -19,7 +19,7 @@ function killPortProcess() {
   }
 }
 
-// Function to make HTTP requests
+// Function to make HTTP GET requests
 function makeRequest(path, headers = {}) {
   return new Promise((resolve, reject) => {
     const options = {
@@ -45,6 +45,36 @@ function makeRequest(path, headers = {}) {
     req.on('error', (err) => {
       reject(err);
     });
+  });
+}
+
+// Function to make HTTP POST requests
+function makePostRequest(path, headers = {}) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'localhost',
+      port: PORT,
+      path: path,
+      method: 'POST',
+      headers: headers
+    };
+    const req = http.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        resolve({
+          statusCode: res.statusCode,
+          headers: res.headers,
+          body: data
+        });
+      });
+    });
+    req.on('error', (err) => {
+      reject(err);
+    });
+    req.end();
   });
 }
 
@@ -135,6 +165,14 @@ test('Security Vulnerability Fix Integration Tests', async (t) => {
       const body = JSON.parse(res.body);
       assert.strictEqual(body.success, false);
       assert.match(body.error, /Invalid Project ID format/);
+    });
+
+    await t.test('Test 9: POST /api/validate -> should succeed with 200 and return validation results', async () => {
+      const res = await makePostRequest('/api/validate');
+      assert.strictEqual(res.statusCode, 200);
+      const body = JSON.parse(res.body);
+      assert.strictEqual(body.success, true);
+      assert.strictEqual(body.passed, true);
     });
 
   } finally {

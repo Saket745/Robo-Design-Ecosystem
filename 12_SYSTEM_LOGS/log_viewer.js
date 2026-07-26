@@ -107,51 +107,52 @@ function tailLogs(n) {
 
 // ── Main CLI entrypoint ──
 if (require.main === module) {
-  const args = parseArgs(process.argv.slice(2));
-  const command = args._positional[0];
+  (async () => {
+    const args = parseArgs(process.argv.slice(2));
+    const command = args._positional[0];
 
-  const limit = parseInt(args.limit, 10) || 50;
-  const startTime = args.from || undefined;
-  const endTime = args.to || undefined;
+    const limit = parseInt(args.limit, 10) || 50;
+    const startTime = args.from || undefined;
+    const endTime = args.to || undefined;
 
-  if (command === 'audit') {
-    const entries = auditLogger.queryAuditLogs({
-      limit,
-      action: args.action,
-      actor: args.actor,
-      startTime,
-      endTime
-    });
-    printEntries(entries, 'audit');
-  }
-  else if (command === 'exec') {
-    const entries = executionLogger.queryExecutionLogs({
-      limit,
-      taskId: args.taskId,
-      status: args.status,
-      level: args.level,
-      startTime,
-      endTime
-    });
-    printEntries(entries, 'execution');
-  }
-  else if (command === 'all') {
-    const auditEntries = auditLogger.queryAuditLogs({ limit, startTime, endTime });
-    const execEntries = executionLogger.queryExecutionLogs({ limit, startTime, endTime });
+    if (command === 'audit') {
+      const entries = auditLogger.queryAuditLogs({
+        limit,
+        action: args.action,
+        actor: args.actor,
+        startTime,
+        endTime
+      });
+      printEntries(entries, 'audit');
+    }
+    else if (command === 'exec') {
+      const entries = await executionLogger.queryExecutionLogs({
+        limit,
+        taskId: args.taskId,
+        status: args.status,
+        level: args.level,
+        startTime,
+        endTime
+      });
+      printEntries(entries, 'execution');
+    }
+    else if (command === 'all') {
+      const auditEntries = auditLogger.queryAuditLogs({ limit, startTime, endTime });
+      const execEntries = await executionLogger.queryExecutionLogs({ limit, startTime, endTime });
 
-    // Merge and sort by timestamp descending
-    const merged = [...auditEntries, ...execEntries]
-      .sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))
-      .slice(0, limit);
+      // Merge and sort by timestamp descending
+      const merged = [...auditEntries, ...execEntries]
+        .sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))
+        .slice(0, limit);
 
-    printEntries(merged, 'combined');
-  }
-  else if (command === 'tail') {
-    const lines = parseInt(args.lines, 10) || 20;
-    tailLogs(lines);
-  }
-  else {
-    console.log(`
+      printEntries(merged, 'combined');
+    }
+    else if (command === 'tail') {
+      const lines = parseInt(args.lines, 10) || 20;
+      tailLogs(lines);
+    }
+    else {
+      console.log(`
   Antigravity Log Viewer — Query and filter platform logs
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -167,7 +168,8 @@ if (require.main === module) {
     node log_viewer.js all --from=2026-06-01 --to=2026-06-07
     node log_viewer.js tail --lines=30
 `);
-  }
+    }
+  })().catch(console.error);
 }
 
 module.exports = {
