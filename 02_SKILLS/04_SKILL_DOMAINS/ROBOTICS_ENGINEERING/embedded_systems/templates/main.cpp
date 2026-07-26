@@ -109,6 +109,7 @@ void SensorTask(void * pvParameters) {
         // FIX: Read bytes into a temporary buffer to ensure deterministic evaluation
         // order, since C++ does not guarantee the sequence of evaluation for '|' operands,
         // and direct Wire.read() calls in a single expression can return bytes in swapped order.
+        // This ensures sequential, predictable evaluation of sensor bytes.
         uint8_t imu_buf[12];
         for (int b = 0; b < 12; b++) {
             imu_buf[b] = Wire.read();
