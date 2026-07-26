@@ -15,32 +15,55 @@ function logAudit(event, agent, project, payload = {}) {
   fs.appendFileSync(logPath, JSON.stringify(logEntry) + '\n', 'utf8');
 }
 
-function queryAuditLogs(filters = {}) {
+async function queryAuditLogs(filters = {}) {
   const { limit = 50, action, actor, startTime, endTime } = filters;
-  if (!fs.existsSync(logPath)) return [];
-  const lines = fs.readFileSync(logPath, 'utf8').split('\n').filter(Boolean);
-  let entries = lines.map(line => {
-    try {
-      return JSON.parse(line);
-    } catch (_) {
-      return null;
+
+  let fileContent;
+  try {
+    fileContent = await fs.promises.readFile(logPath, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return [];
     }
-  }).filter(Boolean);
-
-  if (action) {
-    entries = entries.filter(e => e.action === action);
-  }
-  if (actor) {
-    entries = entries.filter(e => e.actor === actor);
-  }
-  if (startTime) {
-    entries = entries.filter(e => e.timestamp >= startTime);
-  }
-  if (endTime) {
-    entries = entries.filter(e => e.timestamp <= endTime);
+    throw err;
   }
 
-  return entries.reverse().slice(0, limit);
+  const lines = fileContent.split('\n');
+  const entries = [];
+
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch (_) {
+      continue;
+    }
+
+    if (action && entry.action !== action) {
+      continue;
+    }
+    if (actor && entry.actor !== actor) {
+      continue;
+    }
+    if (startTime && entry.timestamp < startTime) {
+      // Chronological order means all older entries are also before startTime.
+      break;
+    }
+    if (endTime && entry.timestamp > endTime) {
+      continue;
+    }
+
+    entries.push(entry);
+
+    if (entries.length >= limit) {
+      break;
+    }
+  }
+
+  return entries;
 }
 
 module.exports = {
