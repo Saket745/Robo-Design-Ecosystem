@@ -1,10 +1,35 @@
+const test = require('node:test');
+const assert = require('node:assert');
 const { spawn } = require('child_process');
 const http = require('http');
+const crypto = require('crypto');
 
-console.log('--- Starting Integration Test for Security Vulnerability Fix ---');
-
-// Port used by the server
 const PORT = 3000;
+const TEST_JWT_SECRET = 'test_jwt_secret_123';
+
+function signJwt(payload, secret) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+
+  const base64UrlEncode = (obj) => {
+    return Buffer.from(JSON.stringify(obj))
+      .toString('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+  };
+
+  const headerB64 = base64UrlEncode(header);
+  const payloadB64 = base64UrlEncode(payload);
+
+  const hmac = crypto.createHmac('sha256', secret);
+  hmac.update(`${headerB64}.${payloadB64}`);
+  const signatureB64 = hmac.digest('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+
+  return `${headerB64}.${payloadB64}.${signatureB64}`;
+}
 
 // Helper to kill any process running on PORT
 function killPortProcess() {
@@ -20,10 +45,17 @@ function killPortProcess() {
   }
 }
 
-// Function to make HTTP requests
-function makeRequest(path) {
+// Function to make HTTP requests with optional headers
+function makeRequest(path, headers = {}) {
   return new Promise((resolve, reject) => {
-    http.get(`http://localhost:${PORT}${path}`, (res) => {
+    const options = {
+      hostname: 'localhost',
+      port: PORT,
+      path: path,
+      method: 'GET',
+      headers: headers
+    };
+    http.get(options, (res) => {
       let data = '';
       res.on('data', (chunk) => {
         data += chunk;
@@ -41,142 +73,134 @@ function makeRequest(path) {
   });
 }
 
-async function runTests() {
+test('scripts/test-security-fix.js integration tests', async (t) => {
   console.log('Clearing port 3000...');
   killPortProcess();
 
-  console.log('Spawning server process...');
+  console.log('Spawning server process with custom JWT_SECRET...');
   const serverProc = spawn('node', ['scripts/server.js'], {
-    stdio: 'inherit',
-    detached: false
+    stdio: 'ignore', // Ignore stdio to avoid signal/pipe interference with the parent
+    detached: false,
+    env: {
+      ...process.env,
+      JWT_SECRET: TEST_JWT_SECRET
+    }
   });
 
   // Give server 1.5 seconds to start up
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  let failed = false;
-
-  try {
-    // Test 1: Default logs endpoint (no type parameter) -> should default to 'execution' and succeed (200)
-    console.log('\n[Test 1] Fetching default /api/logs...');
-    const res1 = await makeRequest('/api/logs');
-    if (res1.statusCode === 200) {
-      console.log('✅ Test 1 Passed: Successfully fetched logs (200 OK)');
-    } else {
-      console.error(`❌ Test 1 Failed: Expected status 200, got ${res1.statusCode}`);
-      failed = true;
-    }
-
-    // Test 2: Valid logs type 'execution' -> should succeed (200)
-    console.log('\n[Test 2] Fetching /api/logs?type=execution...');
-    const res2 = await makeRequest('/api/logs?type=execution');
-    if (res2.statusCode === 200) {
-      console.log('✅ Test 2 Passed: Successfully fetched execution logs (200 OK)');
-    } else {
-      console.error(`❌ Test 2 Failed: Expected status 200, got ${res2.statusCode}`);
-      failed = true;
-    }
-
-    // Test 3: Valid logs type 'audit' -> should succeed (200)
-    console.log('\n[Test 3] Fetching /api/logs?type=audit...');
-    const res3 = await makeRequest('/api/logs?type=audit');
-    if (res3.statusCode === 200) {
-      console.log('✅ Test 3 Passed: Successfully fetched audit logs (200 OK)');
-    } else {
-      console.error(`❌ Test 3 Failed: Expected status 200, got ${res3.statusCode}`);
-      failed = true;
-    }
-
-    // Test 4: Invalid logs type 'invalid_type' -> should fail with 400 Bad Request
-    console.log('\n[Test 4] Fetching /api/logs?type=invalid_type...');
-    const res4 = await makeRequest('/api/logs?type=invalid_type');
-    if (res4.statusCode === 400) {
-      const body = JSON.parse(res4.body);
-      if (body.success === false && body.error.includes('Invalid log type')) {
-        console.log('✅ Test 4 Passed: Properly blocked invalid type with 400 Bad Request and error message');
-      } else {
-        console.error('❌ Test 4 Failed: Expected specific error payload, got:', body);
-        failed = true;
-      }
-    } else {
-      console.error(`❌ Test 4 Failed: Expected status 400, got ${res4.statusCode}`);
-      failed = true;
-    }
-
-    // Test 5: Malicious traversal parameter '../etc/passwd' -> should fail with 400 Bad Request
-    console.log('\n[Test 5] Fetching /api/logs?type=../etc/passwd...');
-    const res5 = await makeRequest('/api/logs?type=../etc/passwd');
-    if (res5.statusCode === 400) {
-      const body = JSON.parse(res5.body);
-      if (body.success === false && body.error.includes('Invalid log type')) {
-        console.log('✅ Test 5 Passed: Properly blocked path traversal input with 400 Bad Request');
-      } else {
-        console.error('❌ Test 5 Failed: Expected specific error payload, got:', body);
-        failed = true;
-      }
-    } else {
-      console.error(`❌ Test 5 Failed: Expected status 400, got ${res5.statusCode}`);
-      failed = true;
-    }
-
-    // Test 6: Fetching valid project ID state -> should succeed (200)
-    console.log('\n[Test 6] Fetching state with valid project ID /api/state/test_valid_proj_123...');
-    const res6 = await makeRequest('/api/state/test_valid_proj_123');
-    if (res6.statusCode === 200) {
-      console.log('✅ Test 6 Passed: Successfully fetched state for valid project ID (200 OK)');
-    } else {
-      console.error(`❌ Test 6 Failed: Expected status 200, got ${res6.statusCode}`);
-      failed = true;
-    }
-
-    // Test 7: Malicious project ID with path traversal -> should fail with 400 Bad Request
-    console.log('\n[Test 7] Fetching state with malicious path-traversal project ID /api/state?projectId=../../etc/passwd...');
-    const res7 = await makeRequest('/api/state?projectId=../../etc/passwd');
-    if (res7.statusCode === 400) {
-      const body = JSON.parse(res7.body);
-      if (body.success === false && body.error.includes('Invalid Project ID format')) {
-        console.log('✅ Test 7 Passed: Properly blocked path traversal project ID with 400 Bad Request');
-      } else {
-        console.error('❌ Test 7 Failed: Expected invalid project ID format error, got:', body);
-        failed = true;
-      }
-    } else {
-      console.error(`❌ Test 7 Failed: Expected status 400, got ${res7.statusCode}`);
-      failed = true;
-    }
-
-    // Test 8: Malicious project ID with special characters -> should fail with 400 Bad Request
-    console.log('\n[Test 8] Fetching state with invalid special characters project ID /api/state/project-illegal$...');
-    const res8 = await makeRequest('/api/state/project-illegal$');
-    if (res8.statusCode === 400) {
-      const body = JSON.parse(res8.body);
-      if (body.success === false && body.error.includes('Invalid Project ID format')) {
-        console.log('✅ Test 8 Passed: Properly blocked illegal characters in project ID with 400 Bad Request');
-      } else {
-        console.error('❌ Test 8 Failed: Expected invalid project ID format error, got:', body);
-        failed = true;
-      }
-    } else {
-      console.error(`❌ Test 8 Failed: Expected status 400, got ${res8.statusCode}`);
-      failed = true;
-    }
-
-  } catch (err) {
-    console.error('An error occurred during test execution:', err);
-    failed = true;
-  } finally {
+  t.after(() => {
     console.log('\nTerminating server process...');
-    serverProc.kill();
-    killPortProcess();
-  }
+    serverProc.kill('SIGKILL');
+  });
 
-  if (failed) {
-    console.error('\n❌ Security validation tests FAILED!');
-    process.exit(1);
-  } else {
-    console.log('\n🏆 All security validation tests PASSED successfully!');
-    process.exit(0);
-  }
-}
+  const validToken = signJwt({ role: 'admin', user: 'test_user' }, TEST_JWT_SECRET);
+  const invalidSignatureToken = signJwt({ role: 'admin', user: 'test_user' }, 'wrong_secret_key');
+  const invalidRoleToken = signJwt({ role: 'user', user: 'test_user' }, TEST_JWT_SECRET);
 
-runTests();
+  await t.test('Test 1a: Fetching default /api/logs WITHOUT a token -> should fail with 401 Unauthorized', async () => {
+    const res = await makeRequest('/api/logs');
+    assert.strictEqual(res.statusCode, 401);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, false);
+    assert.ok(body.error.includes('401 Unauthorized'));
+  });
+
+  await t.test('Test 1b: Fetching default /api/logs WITH invalid signature JWT -> should fail with 401 Unauthorized', async () => {
+    const res = await makeRequest('/api/logs', { 'Authorization': `Bearer ${invalidSignatureToken}` });
+    assert.strictEqual(res.statusCode, 401);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, false);
+    assert.ok(body.error.includes('401 Unauthorized'));
+  });
+
+  await t.test('Test 1c: Fetching default /api/logs WITH invalid role JWT -> should fail with 401 Unauthorized', async () => {
+    const res = await makeRequest('/api/logs', { 'Authorization': `Bearer ${invalidRoleToken}` });
+    assert.strictEqual(res.statusCode, 401);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, false);
+    assert.ok(body.error.includes('401 Unauthorized'));
+  });
+
+  await t.test('Test 1d: Fetching default /api/logs WITH valid Bearer JWT -> should succeed (200 OK)', async () => {
+    const res = await makeRequest('/api/logs', { 'Authorization': `Bearer ${validToken}` });
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  await t.test('Test 1e: Fetching default /api/logs WITH valid JWT cookie -> should succeed (200 OK)', async () => {
+    const res = await makeRequest('/api/logs', { 'Cookie': `logs_token=${validToken}` });
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  await t.test('Test 1f: Fetching default /api/logs WITH valid JWT query parameter -> should succeed (200 OK)', async () => {
+    const res = await makeRequest(`/api/logs?token=${validToken}`);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  await t.test('Test 1g: Fetching root index / sets cookie with valid signed JWT -> should succeed (200 OK)', async () => {
+    const res = await makeRequest('/');
+    assert.strictEqual(res.statusCode, 200);
+    const setCookie = res.headers['set-cookie'];
+    assert.ok(setCookie);
+    const cookieStr = setCookie[0];
+    assert.ok(cookieStr.includes('logs_token='));
+    assert.ok(cookieStr.includes('HttpOnly'));
+    assert.ok(cookieStr.includes('SameSite=Strict'));
+
+    // Extract token from cookie string and verify it
+    const tokenPart = cookieStr.split(';')[0].split('=')[1];
+    assert.notStrictEqual(tokenPart, TEST_JWT_SECRET); // It should NOT leak the raw secret!
+
+    // Test logging with the browser's set cookie
+    const logsRes = await makeRequest('/api/logs', { 'Cookie': `logs_token=${tokenPart}` });
+    assert.strictEqual(logsRes.statusCode, 200);
+  });
+
+  await t.test('Test 2: Valid logs type "execution" (with valid token) -> should succeed (200 OK)', async () => {
+    const res = await makeRequest(`/api/logs?type=execution&token=${validToken}`);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  await t.test('Test 3: Valid logs type "audit" (with valid token) -> should succeed (200 OK)', async () => {
+    const res = await makeRequest(`/api/logs?type=audit&token=${validToken}`);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  await t.test('Test 4: Invalid logs type "invalid_type" (with valid token) -> should fail with 400 Bad Request', async () => {
+    const res = await makeRequest(`/api/logs?type=invalid_type&token=${validToken}`);
+    assert.strictEqual(res.statusCode, 400);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, false);
+    assert.ok(body.error.includes('Invalid log type'));
+  });
+
+  await t.test('Test 5: Malicious traversal parameter "../etc/passwd" (with valid token) -> should fail with 400 Bad Request', async () => {
+    const res = await makeRequest(`/api/logs?type=../etc/passwd&token=${validToken}`);
+    assert.strictEqual(res.statusCode, 400);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, false);
+    assert.ok(body.error.includes('Invalid log type'));
+  });
+
+  await t.test('Test 6: Fetching valid project ID state -> should succeed (200 OK)', async () => {
+    const res = await makeRequest('/api/state/test_valid_proj_123');
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  await t.test('Test 7: Malicious project ID with path traversal -> should fail with 400 Bad Request', async () => {
+    const res = await makeRequest('/api/state?projectId=../../etc/passwd');
+    assert.strictEqual(res.statusCode, 400);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, false);
+    assert.ok(body.error.includes('Invalid Project ID format'));
+  });
+
+  await t.test('Test 8: Malicious project ID with special characters -> should fail with 400 Bad Request', async () => {
+    const res = await makeRequest('/api/state/project-illegal$');
+    assert.strictEqual(res.statusCode, 400);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.success, false);
+    assert.ok(body.error.includes('Invalid Project ID format'));
+  });
+});

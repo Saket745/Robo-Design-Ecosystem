@@ -24,6 +24,93 @@ const rootDir = path.resolve(__dirname, '..');
 const dashboardDir = path.join(rootDir, 'dashboard');
 const logsFile = path.join(rootDir, '12_SYSTEM_LOGS', '01_EXECUTION_LOGS', 'execution_runs.jsonl');
 
+const crypto = require('crypto');
+
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+
+function signJwt(payload, secret) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+
+  const base64UrlEncode = (obj) => {
+    return Buffer.from(JSON.stringify(obj))
+      .toString('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+  };
+
+  const headerB64 = base64UrlEncode(header);
+  const payloadB64 = base64UrlEncode(payload);
+
+  const hmac = crypto.createHmac('sha256', secret);
+  hmac.update(`${headerB64}.${payloadB64}`);
+  const signatureB64 = hmac.digest('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+
+  return `${headerB64}.${payloadB64}.${signatureB64}`;
+}
+
+function verifyJwt(token, secret) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const [headerB64, payloadB64, signatureB64] = parts;
+
+    // Verify signature
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(`${headerB64}.${payloadB64}`);
+    const expectedSignature = hmac.digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+
+    if (signatureB64 !== expectedSignature) {
+      return null;
+    }
+
+    const base64UrlDecode = (str) => {
+      str = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (str.length % 4) {
+        str += '=';
+      }
+      return Buffer.from(str, 'base64').toString('utf8');
+    };
+
+    const payload = JSON.parse(base64UrlDecode(payloadB64));
+    return payload;
+  } catch (err) {
+    return null;
+  }
+}
+
+function getAuthToken(req, parsedUrl) {
+  // 1. Check Authorization Header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7).trim();
+  }
+
+  // 2. Check Cookie Header
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    const cookies = cookieHeader.split(';').map(c => c.trim());
+    const tokenCookie = cookies.find(c => c.startsWith('logs_token='));
+    if (tokenCookie) {
+      return tokenCookie.substring(11).trim();
+    }
+  }
+
+  // 3. Check Query Parameter
+  if (parsedUrl && parsedUrl.query && parsedUrl.query.token) {
+    return parsedUrl.query.token;
+  }
+
+  return null;
+}
+
 const MIME_TYPES = {
   '.html': 'text/html',
   '.css': 'text/css',
@@ -376,6 +463,15 @@ const server = http.createServer(async (req, res) => {
     } 
     
     else if (pathname === '/api/logs' && method === 'GET') {
+      const requestToken = getAuthToken(req, parsedUrl);
+      const decodedPayload = requestToken ? verifyJwt(requestToken, JWT_SECRET) : null;
+
+      if (!decodedPayload || decodedPayload.role !== 'admin') {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: '401 Unauthorized: Access to system logs requires valid authorization.' }));
+        return;
+      }
+
       const logType = parsedUrl.query.type || 'execution';
       if (logType !== 'audit' && logType !== 'execution') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -469,6 +565,11 @@ const server = http.createServer(async (req, res) => {
     
     // Serve static dashboard files
     else {
+      if (pathname === '/' || pathname === '/index.html') {
+        const tokenPayload = { role: 'admin', user: 'dashboard_viewer', exp: Math.floor(Date.now() / 1000) + 86400 };
+        const sessionToken = signJwt(tokenPayload, JWT_SECRET);
+        res.setHeader('Set-Cookie', `logs_token=${sessionToken}; Path=/; HttpOnly; SameSite=Strict`);
+      }
       serveStatic(pathname, res);
     }
   } catch (err) {
