@@ -67,16 +67,44 @@ function serveStatic(reqPath, res) {
 function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
-    req.on('data', chunk => {
+    let totalBytes = 0;
+    const limit = 1024 * 1024; // 1MB limit
+
+    const onData = chunk => {
+      totalBytes += chunk.length;
+      if (totalBytes > limit) {
+        cleanup();
+        const err = new Error('Payload too large');
+        err.statusCode = 413;
+        reject(err);
+        return;
+      }
       body += chunk.toString();
-    });
-    req.on('end', () => {
+    };
+
+    const onEnd = () => {
+      cleanup();
       try {
         resolve(body ? JSON.parse(body) : {});
       } catch (err) {
         reject(err);
       }
-    });
+    };
+
+    const onError = err => {
+      cleanup();
+      reject(err);
+    };
+
+    function cleanup() {
+      req.removeListener('data', onData);
+      req.removeListener('end', onEnd);
+      req.removeListener('error', onError);
+    }
+
+    req.on('data', onData);
+    req.on('end', onEnd);
+    req.on('error', onError);
   });
 }
 
@@ -486,7 +514,8 @@ const server = http.createServer(async (req, res) => {
     }
   } catch (err) {
     console.error('Server error on request:', req.url, err);
-    res.writeHead(500, { 'Content-Type': 'application/json' });
+    const statusCode = err.statusCode || 500;
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: false, error: err.message }));
   }
 });
