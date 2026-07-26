@@ -187,7 +187,7 @@ void loop() {
         if (id == 0x100) { // Command packet ID
             for (int i = 0; i < 12 && CAN.available(); i++) {
                 // FIX: Same evaluation-order bug as SensorTask.
-                // Read low byte first, then high byte, deterministically.
+                // Read low byte first, then high byte, sequentially to guarantee deterministic evaluation order.
                 uint8_t lo = CAN.read();
                 uint8_t hi = CAN.available() ? CAN.read() : 0;
                 int16_t raw_val = (int16_t)(lo | (hi << 8));
