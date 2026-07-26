@@ -119,6 +119,13 @@ async function runDemo() {
   console.log('\x1b[36m======================================================================\x1b[0m');
 }
 
-runDemo().catch(err => {
-  console.error('Demo run failed:', err);
-});
+module.exports = {
+  sleep,
+  runDemo
+};
+
+if (require.main === module) {
+  runDemo().catch(err => {
+    console.error('Demo run failed:', err);
+  });
+}
