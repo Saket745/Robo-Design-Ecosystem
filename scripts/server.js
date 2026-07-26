@@ -478,10 +478,17 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`==================================================`);
-  console.log(`Antigravity Robotics Ecosystem Server is LIVE!`);
-  console.log(`Access the interactive dashboard at:`);
-  console.log(`👉 http://localhost:${PORT}`);
-  console.log(`==================================================`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`==================================================`);
+    console.log(`Antigravity Robotics Ecosystem Server is LIVE!`);
+    console.log(`Access the interactive dashboard at:`);
+    console.log(`👉 http://localhost:${PORT}`);
+    console.log(`==================================================`);
+  });
+}
+
+module.exports = {
+  parseJsonBody,
+  server
+};
