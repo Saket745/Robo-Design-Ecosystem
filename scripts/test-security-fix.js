@@ -47,6 +47,34 @@ function makeRequest(path, headers = {}) {
   });
 }
 
+// Function to make HTTP POST requests
+function makePostRequest(path) {
+  return new Promise((resolve, reject) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: PORT,
+      path: path,
+      method: 'POST'
+    }, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        resolve({
+          statusCode: res.statusCode,
+          headers: res.headers,
+          body: data
+        });
+      });
+    });
+    req.on('error', (err) => {
+      reject(err);
+    });
+    req.end();
+  });
+}
+
 async function runTests() {
   console.log('Clearing port 3000...');
   killPortProcess();
@@ -225,6 +253,22 @@ async function runTests() {
       }
     } else {
       console.error(`❌ Test 8 Failed: Expected status 400, got ${res8.statusCode}`);
+      failed = true;
+    }
+
+    // Test 9: POST /api/validate -> should succeed with 200 and return validation results
+    console.log('\n[Test 9] Triggering validation via POST /api/validate...');
+    const res9 = await makePostRequest('/api/validate');
+    if (res9.statusCode === 200) {
+      const body = JSON.parse(res9.body);
+      if (body.success === true && body.passed === true) {
+        console.log('✅ Test 9 Passed: Successfully validated ecosystem via async walkDir (200 OK)');
+      } else {
+        console.error('❌ Test 9 Failed: Expected success and passed, got:', body);
+        failed = true;
+      }
+    } else {
+      console.error(`❌ Test 9 Failed: Expected status 200, got ${res9.statusCode}`);
       failed = true;
     }
 
