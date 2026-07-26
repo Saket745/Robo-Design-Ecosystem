@@ -1,4 +1,25 @@
 // Custom YAML parser (zero dependencies, zero external libraries)
+
+function stripQuotes(val) {
+  if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+    return val.substring(1, val.length - 1);
+  }
+  return val;
+}
+
+function parseValue(val) {
+  if (val.startsWith('[') && val.endsWith(']')) {
+    return val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
+  }
+  if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+    return val.substring(1, val.length - 1);
+  }
+  if (val === 'true') return true;
+  if (val === 'false') return false;
+  if (!isNaN(val) && val !== '') return Number(val);
+  return val;
+}
+
 function parseYAML(content) {
   if (!content) return {};
   const lines = content.split(/\r?\n/).map(line => {
@@ -8,6 +29,34 @@ function parseYAML(content) {
     }
     return line;
   }).filter(line => line.trim() !== '');
+
+  const parseListItemObject = (valStr, startIdx, parentItemIndent) => {
+    const firstColon = valStr.indexOf(':');
+    const subKey = valStr.substring(0, firstColon).trim();
+    const subRest = valStr.substring(firstColon + 1).trim();
+
+    const itemObj = { [subKey]: parseValue(subRest) };
+    let subIdx = startIdx + 1;
+
+    while (subIdx < lines.length) {
+      const subLine = lines[subIdx];
+      const subIndent = subLine.search(/\S/);
+      const subTrimmed = subLine.trim();
+
+      if (subIndent < parentItemIndent || (subIndent === parentItemIndent && subTrimmed.startsWith('-'))) {
+        break;
+      }
+
+      const subColon = subTrimmed.indexOf(':');
+      if (subColon !== -1) {
+        const k = subTrimmed.substring(0, subColon).trim();
+        const v = subTrimmed.substring(subColon + 1).trim();
+        itemObj[k] = parseValue(v);
+      }
+      subIdx++;
+    }
+    return [itemObj, subIdx];
+  };
 
   const parseNode = (startIdx, parentIndent) => {
     const obj = {};
@@ -29,61 +78,11 @@ function parseYAML(content) {
         const valStr = trimmed.substring(1).trim();
 
         if (valStr.includes(':')) {
-          const firstColon = valStr.indexOf(':');
-          const subKey = valStr.substring(0, firstColon).trim();
-          const subRest = valStr.substring(firstColon + 1).trim();
-
-          let parsedVal = subRest;
-          if (parsedVal.startsWith('[') && parsedVal.endsWith(']')) {
-            parsedVal = parsedVal.substring(1, parsedVal.length - 1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
-          } else if ((parsedVal.startsWith('"') && parsedVal.endsWith('"')) || (parsedVal.startsWith("'") && parsedVal.endsWith("'"))) {
-            parsedVal = parsedVal.substring(1, parsedVal.length - 1);
-          } else if (parsedVal === 'true') {
-            parsedVal = true;
-          } else if (parsedVal === 'false') {
-            parsedVal = false;
-          } else if (!isNaN(parsedVal) && parsedVal !== '') {
-            parsedVal = Number(parsedVal);
-          }
-
-          const itemObj = { [subKey]: parsedVal };
-          let subIdx = idx + 1;
-          while (subIdx < lines.length) {
-            const subLine = lines[subIdx];
-            const subIndent = subLine.search(/\S/);
-            const subTrimmed = subLine.trim();
-
-            if (subIndent < indent || (subIndent === indent && subTrimmed.startsWith('-'))) {
-              break;
-            }
-
-            const subColon = subTrimmed.indexOf(':');
-            if (subColon !== -1) {
-              const k = subTrimmed.substring(0, subColon).trim();
-              let v = subTrimmed.substring(subColon + 1).trim();
-              if (v.startsWith('[') && v.endsWith(']')) {
-                v = v.substring(1, v.length - 1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
-              } else if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
-                v = v.substring(1, v.length - 1);
-              } else if (v === 'true') {
-                v = true;
-              } else if (v === 'false') {
-                v = false;
-              } else if (!isNaN(v) && v !== '') {
-                v = Number(v);
-              }
-              itemObj[k] = v;
-            }
-            subIdx++;
-          }
+          const [itemObj, nextIdx] = parseListItemObject(valStr, idx, indent);
           arr.push(itemObj);
-          idx = subIdx;
+          idx = nextIdx;
         } else {
-          let val = valStr;
-          if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-            val = val.substring(1, val.length - 1);
-          }
-          arr.push(val);
+          arr.push(stripQuotes(valStr));
           idx++;
         }
       } else {
@@ -100,21 +99,7 @@ function parseYAML(content) {
           obj[key] = subNode;
           idx = nextIdx;
         } else {
-          let val = rest;
-          if (val.startsWith('[') && val.endsWith(']')) {
-            val = val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
-          } else {
-            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-              val = val.substring(1, val.length - 1);
-            } else if (val === 'true') {
-              val = true;
-            } else if (val === 'false') {
-              val = false;
-            } else if (!isNaN(val) && val !== '') {
-              val = Number(val);
-            }
-          }
-          obj[key] = val;
+          obj[key] = parseValue(rest);
           idx++;
         }
       }
