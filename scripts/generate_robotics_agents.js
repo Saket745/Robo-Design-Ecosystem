@@ -53,15 +53,16 @@ function ensureDir(dirPath) {
   }
 }
 
-for (const [id, agent] of Object.entries(agentsData)) {
-  const agentDir = path.join(baseDir, id);
-  ensureDir(agentDir);
-  ensureDir(path.join(agentDir, 'workflow_templates'));
-  ensureDir(path.join(agentDir, 'examples'));
-  ensureDir(path.join(agentDir, 'logs'));
+if (require.main === module) {
+  for (const [id, agent] of Object.entries(agentsData)) {
+    const agentDir = path.join(baseDir, id);
+    ensureDir(agentDir);
+    ensureDir(path.join(agentDir, 'workflow_templates'));
+    ensureDir(path.join(agentDir, 'examples'));
+    ensureDir(path.join(agentDir, 'logs'));
 
-  // 1. Write agent.md
-  const agentMdContent = `# Subagent: ${agent.name}
+    // 1. Write agent.md
+    const agentMdContent = `# Subagent: ${agent.name}
 
 ## Description
 ${agent.description}
@@ -77,24 +78,30 @@ ${agent.permissions.map(p => `- ${p}`).join('\n')}
 - [ ] No circular dependencies in execution.
 - [ ] Confidence score >= 0.8.
 `;
-  fs.writeFileSync(path.join(agentDir, 'agent.md'), agentMdContent, 'utf8');
+    fs.writeFileSync(path.join(agentDir, 'agent.md'), agentMdContent, 'utf8');
 
-  // 2. Write capabilities.yaml
-  const capsYamlContent = `agent_id: ${id}
+    // 2. Write capabilities.yaml
+    const capsYamlContent = `agent_id: ${id}
 name: ${agent.name}
 capabilities:
 ${agent.capabilities.map(c => `  - ${c}`).join('\n')}
 `;
-  fs.writeFileSync(path.join(agentDir, 'capabilities.yaml'), capsYamlContent, 'utf8');
+    fs.writeFileSync(path.join(agentDir, 'capabilities.yaml'), capsYamlContent, 'utf8');
 
-  // 3. Write permissions.yaml
-  const permsYamlContent = `agent_id: ${id}
+    // 3. Write permissions.yaml
+    const permsYamlContent = `agent_id: ${id}
 permissions:
 ${agent.permissions.map(p => `  - ${p}`).join('\n')}
 `;
-  fs.writeFileSync(path.join(agentDir, 'permissions.yaml'), permsYamlContent, 'utf8');
+    fs.writeFileSync(path.join(agentDir, 'permissions.yaml'), permsYamlContent, 'utf8');
 
-  console.log(`Generated subagent structure for: ${id}`);
+    console.log(`Generated subagent structure for: ${id}`);
+  }
+
+  console.log('Robotics subagents generated successfully.');
 }
 
-console.log('Robotics subagents generated successfully.');
+module.exports = {
+  ensureDir,
+  agentsData
+};
