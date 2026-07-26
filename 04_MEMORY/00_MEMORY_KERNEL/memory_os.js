@@ -32,7 +32,25 @@ const SEGMENTS = {
   PROCEDURAL: 'procedural_memory'
 };
 
+let cachedIndex = null;
+let cachedMtime = 0;
+
 function loadIndex() {
+  try {
+    if (fs.existsSync(indexFilePath)) {
+      const stat = fs.statSync(indexFilePath);
+      if (cachedIndex && stat.mtimeMs === cachedMtime) {
+        return cachedIndex;
+      }
+      const raw = fs.readFileSync(indexFilePath, 'utf8');
+      cachedIndex = JSON.parse(raw);
+      cachedMtime = stat.mtimeMs;
+      return cachedIndex;
+    }
+  } catch (err) {
+    console.error('Error reading memory index from cache check:', err);
+  }
+
   const safeIndexDir = validatePath(path.dirname(indexFilePath));
   ensureDir(safeIndexDir);
   if (!fs.existsSync(indexFilePath)) {
@@ -45,8 +63,11 @@ function loadIndex() {
     return defaultIndex;
   }
   try {
+    const stat = fs.statSync(indexFilePath);
     const raw = fs.readFileSync(indexFilePath, 'utf8');
-    return JSON.parse(raw);
+    cachedIndex = JSON.parse(raw);
+    cachedMtime = stat.mtimeMs;
+    return cachedIndex;
   } catch (err) {
     console.error('Error reading memory index, returning default:', err);
     return { entries: [] };
@@ -57,6 +78,13 @@ function saveIndex(index) {
   const safeIndexDir = validatePath(path.dirname(indexFilePath));
   ensureDir(safeIndexDir);
   fs.writeFileSync(indexFilePath, JSON.stringify(index, null, 2), 'utf8');
+  cachedIndex = index;
+  try {
+    const stat = fs.statSync(indexFilePath);
+    cachedMtime = stat.mtimeMs;
+  } catch (err) {
+    cachedMtime = 0;
+  }
 }
 
 function registerMemory(filePath, segment, tags = [], metadata = {}) {

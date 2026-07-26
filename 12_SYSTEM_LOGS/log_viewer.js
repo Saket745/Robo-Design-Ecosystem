@@ -126,7 +126,7 @@ if (require.main === module) {
       printEntries(entries, 'audit');
     }
     else if (command === 'exec') {
-      const entries = executionLogger.queryExecutionLogs({
+      const entries = await executionLogger.queryExecutionLogs({
         limit,
         taskId: args.taskId,
         status: args.status,
@@ -137,8 +137,10 @@ if (require.main === module) {
       printEntries(entries, 'execution');
     }
     else if (command === 'all') {
-      const auditEntries = await auditLogger.queryAuditLogs({ limit, startTime, endTime });
-      const execEntries = executionLogger.queryExecutionLogs({ limit, startTime, endTime });
+      const [auditEntries, execEntries] = await Promise.all([
+        auditLogger.queryAuditLogs({ limit, startTime, endTime }),
+        executionLogger.queryExecutionLogs({ limit, startTime, endTime })
+      ]);
 
       // Merge and sort by timestamp descending
       const merged = [...auditEntries, ...execEntries]
@@ -169,10 +171,7 @@ if (require.main === module) {
     node log_viewer.js tail --lines=30
 `);
     }
-  })().catch(err => {
-    console.error('Fatal error in Log Viewer CLI:', err);
-    process.exit(1);
-  });
+  })().catch(console.error);
 }
 
 module.exports = {
