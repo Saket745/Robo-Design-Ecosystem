@@ -32,7 +32,16 @@ const SEGMENTS = {
   PROCEDURAL: 'procedural_memory'
 };
 
+let cachedIndex = null;
+
+function clearCache() {
+  cachedIndex = null;
+}
+
 function loadIndex() {
+  if (cachedIndex !== null) {
+    return cachedIndex;
+  }
   const safeIndexDir = validatePath(path.dirname(indexFilePath));
   ensureDir(safeIndexDir);
   if (!fs.existsSync(indexFilePath)) {
@@ -42,11 +51,13 @@ function loadIndex() {
       entries: []
     };
     saveIndex(defaultIndex);
+    cachedIndex = defaultIndex;
     return defaultIndex;
   }
   try {
     const raw = fs.readFileSync(indexFilePath, 'utf8');
-    return JSON.parse(raw);
+    cachedIndex = JSON.parse(raw);
+    return cachedIndex;
   } catch (err) {
     console.error('Error reading memory index, returning default:', err);
     return { entries: [] };
@@ -54,6 +65,7 @@ function loadIndex() {
 }
 
 function saveIndex(index) {
+  cachedIndex = index;
   const safeIndexDir = validatePath(path.dirname(indexFilePath));
   ensureDir(safeIndexDir);
   fs.writeFileSync(indexFilePath, JSON.stringify(index, null, 2), 'utf8');
@@ -142,7 +154,8 @@ module.exports = {
   SEGMENTS,
   registerMemory,
   queryMemory,
-  loadIndex
+  loadIndex,
+  clearCache
 };
 
 // Command line interface
