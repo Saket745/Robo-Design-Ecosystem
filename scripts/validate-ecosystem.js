@@ -25,71 +25,94 @@ function assertFileExists(filePath, description) {
   return true;
 }
 
-console.log('--- Phase 1: Verification of Core Foundation ---');
-const hasDna = assertFileExists('00_CORE_BRAIN/SYSTEM_DNA.yaml', 'System DNA config');
-const hasManifest = assertFileExists('02_SKILLS/MANIFEST.yaml', 'Skills Manifest');
-const hasConfig = assertFileExists('16_CONFIG/workspace.config.yaml', 'Workspace Config');
-
-// 2. Instantiate Validator Core Engine
-console.log('\n--- Phase 2: Running Validator Core Engine ---');
-const validator = new Validator();
-
-// Run schema, naming, and dependency validations on skills and config
-console.log('Executing validation pipeline (schemas, naming, dependencies, boundaries)...');
-const pipelineResult = validator.runPipeline(root, ['schema', 'naming', 'dependencies']);
-
-if (pipelineResult.pass) {
-  logSuccess('Validation pipeline checks passed successfully.');
-} else {
-  pipelineResult.errors.forEach(err => {
-    logError(err);
-  });
+function getExitCode() {
+  return exitCode;
 }
 
-// 3. Security Hygiene Check (Local-first sandbox rules)
-console.log('\n--- Phase 3: Running Security Hygiene Checks ---');
-const forbiddenPatterns = [
-  /^\.env$/,
-  /client_secret.*\.json$/,
-  /secrets?\.json$/,
-  /\.key$/,
-  /id_rsa/
-];
-
-function walkDir(dir, callback) {
-  fs.readdirSync(dir).forEach(f => {
-    const dirPath = path.join(dir, f);
-    const isDirectory = fs.statSync(dirPath).isDirectory();
-    if (f === 'node_modules' || f === '.git' || f === '17_SECRETS' || f === '13_BACKUPS') {
-      return; // Skip ignore zones
-    }
-    if (isDirectory) {
-      walkDir(dirPath, callback);
-    } else {
-      callback(dirPath);
-    }
-  });
+function setExitCode(code) {
+  exitCode = code;
 }
 
-try {
-  walkDir(root, (filePath) => {
-    const relative = path.relative(root, filePath);
-    const basename = path.basename(filePath);
-    forbiddenPatterns.forEach(pattern => {
-      if (pattern.test(basename)) {
-        logError(`Security Violation: Forbidden file pattern detected: ${relative}`);
+function runValidation() {
+  console.log('--- Phase 1: Verification of Core Foundation ---');
+  const hasDna = assertFileExists('00_CORE_BRAIN/SYSTEM_DNA.yaml', 'System DNA config');
+  const hasManifest = assertFileExists('02_SKILLS/MANIFEST.yaml', 'Skills Manifest');
+  const hasConfig = assertFileExists('16_CONFIG/workspace.config.yaml', 'Workspace Config');
+
+  // 2. Instantiate Validator Core Engine
+  console.log('\n--- Phase 2: Running Validator Core Engine ---');
+  const validator = new Validator();
+
+  // Run schema, naming, and dependency validations on skills and config
+  console.log('Executing validation pipeline (schemas, naming, dependencies, boundaries)...');
+  const pipelineResult = validator.runPipeline(root, ['schema', 'naming', 'dependencies']);
+
+  if (pipelineResult.pass) {
+    logSuccess('Validation pipeline checks passed successfully.');
+  } else {
+    pipelineResult.errors.forEach(err => {
+      logError(err);
+    });
+  }
+
+  // 3. Security Hygiene Check (Local-first sandbox rules)
+  console.log('\n--- Phase 3: Running Security Hygiene Checks ---');
+  const forbiddenPatterns = [
+    /^\.env$/,
+    /client_secret.*\.json$/,
+    /secrets?\.json$/,
+    /\.key$/,
+    /id_rsa/
+  ];
+
+  function walkDir(dir, callback) {
+    fs.readdirSync(dir).forEach(f => {
+      const dirPath = path.join(dir, f);
+      const isDirectory = fs.statSync(dirPath).isDirectory();
+      if (f === 'node_modules' || f === '.git' || f === '17_SECRETS' || f === '13_BACKUPS') {
+        return; // Skip ignore zones
+      }
+      if (isDirectory) {
+        walkDir(dirPath, callback);
+      } else {
+        callback(dirPath);
       }
     });
-  });
-} catch (err) {
-  logError(`Hygiene scan failed: ${err.message}`);
+  }
+
+  try {
+    walkDir(root, (filePath) => {
+      const relative = path.relative(root, filePath);
+      const basename = path.basename(filePath);
+      forbiddenPatterns.forEach(pattern => {
+        if (pattern.test(basename)) {
+          logError(`Security Violation: Forbidden file pattern detected: ${relative}`);
+        }
+      });
+    });
+  } catch (err) {
+    logError(`Hygiene scan failed: ${err.message}`);
+  }
+
+  // 4. Summarize results
+  if (exitCode === 0) {
+    console.log('\n\x1b[32mEcosystem validation succeeded! All components verified.\x1b[0m');
+  } else {
+    console.error('\n\x1b[31mEcosystem validation failed. Please fix errors listed above.\x1b[0m');
+  }
+
+  process.exit(exitCode);
 }
 
-// 4. Summarize results
-if (exitCode === 0) {
-  console.log('\n\x1b[32mEcosystem validation succeeded! All components verified.\x1b[0m');
-} else {
-  console.error('\n\x1b[31mEcosystem validation failed. Please fix errors listed above.\x1b[0m');
+if (require.main === module) {
+  runValidation();
 }
 
-process.exit(exitCode);
+module.exports = {
+  logError,
+  logSuccess,
+  assertFileExists,
+  getExitCode,
+  setExitCode,
+  runValidation
+};
