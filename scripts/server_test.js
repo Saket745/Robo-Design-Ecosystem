@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const EventEmitter = require('events');
-const { parseJsonBody } = require('./server');
+const { parseJsonBody, getTestDataForPhase } = require('./server');
 
 class MockRequest extends EventEmitter {}
 
@@ -48,5 +48,50 @@ test('parseJsonBody unit tests', async (t) => {
     req.emit('end');
 
     await assert.rejects(promise, SyntaxError);
+  });
+});
+
+test('getTestDataForPhase unit tests', async (t) => {
+  await t.test('should return baseline trace_id for any phase', () => {
+    const result = getTestDataForPhase('Requirements');
+    assert.deepStrictEqual(result, { trace_id: 'pipeline_run' });
+  });
+
+  await t.test('should return CAD specific test data with defaults', () => {
+    const result = getTestDataForPhase('CAD', {});
+    assert.strictEqual(result.dimensions, 'Legged');
+    assert.strictEqual(result.weight_kg, 5.2);
+    assert.strictEqual(result.trace_id, 'pipeline_run');
+  });
+
+  await t.test('should return CAD specific test data customized from state', () => {
+    const result = getTestDataForPhase('CAD', { mobility: 'Wheeled' });
+    assert.strictEqual(result.dimensions, 'Wheeled');
+    assert.strictEqual(result.weight_kg, 5.2);
+  });
+
+  await t.test('should return PCB specific test data with defaults', () => {
+    const result = getTestDataForPhase('PCB', {});
+    assert.strictEqual(result.voltage, 12);
+    assert.strictEqual(result.mcu, 'ESP32');
+    assert.strictEqual(result.trace_id, 'pipeline_run');
+  });
+
+  await t.test('should return PCB specific test data customized from state', () => {
+    const result = getTestDataForPhase('PCB', { compute_system: 'RaspberryPi' });
+    assert.strictEqual(result.voltage, 12);
+    assert.strictEqual(result.mcu, 'RaspberryPi');
+  });
+
+  await t.test('should return Validation specific test data', () => {
+    const result = getTestDataForPhase('Validation');
+    assert.deepStrictEqual(result, {
+      trace_id: 'pipeline_run',
+      motor_runaway_protection: true,
+      max_cell_voltage: 4.2,
+      min_cell_voltage: 3.1,
+      max_temperature_c: 65,
+      emergency_stop_implemented: true
+    });
   });
 });

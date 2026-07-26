@@ -1,12 +1,4 @@
-// Custom YAML parser (zero dependencies, zero external libraries)
-
-function stripQuotes(val) {
-  if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-    return val.substring(1, val.length - 1);
-  }
-  return val;
-}
-
+// Helper function to parse primitive types, inline arrays, and strings in YAML
 function parseValue(val) {
   if (val.startsWith('[') && val.endsWith(']')) {
     return val.substring(1, val.length - 1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
@@ -14,12 +6,19 @@ function parseValue(val) {
   if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
     return val.substring(1, val.length - 1);
   }
-  if (val === 'true') return true;
-  if (val === 'false') return false;
-  if (!isNaN(val) && val !== '') return Number(val);
+  if (val === 'true') {
+    return true;
+  }
+  if (val === 'false') {
+    return false;
+  }
+  if (!isNaN(val) && val !== '') {
+    return Number(val);
+  }
   return val;
 }
 
+// Custom YAML parser (zero dependencies, zero external libraries)
 function parseYAML(content) {
   if (!content) return {};
   const lines = content.split(/\r?\n/).map(line => {
@@ -82,7 +81,7 @@ function parseYAML(content) {
           arr.push(itemObj);
           idx = nextIdx;
         } else {
-          arr.push(stripQuotes(valStr));
+          arr.push(parseValue(valStr));
           idx++;
         }
       } else {

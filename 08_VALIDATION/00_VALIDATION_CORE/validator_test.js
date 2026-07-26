@@ -149,3 +149,100 @@ test('Validator.validateSchema unit tests', async (t) => {
     ]);
   });
 });
+
+test('Validator.validateDependencies unit tests', async (t) => {
+  const fs = require('fs');
+  const path = require('path');
+
+  await t.test('should pass when there are no dependency cycles or arch boundary violations', (subT) => {
+    const validator = new Validator();
+
+    // Mock fs functions
+    subT.mock.method(fs, 'existsSync', (p) => {
+      // simulate no skills directory
+      if (p.includes('02_SKILLS')) return false;
+      return true;
+    });
+
+    subT.mock.method(fs, 'readdirSync', (p) => {
+      // Empty directory
+      return [];
+    });
+
+    const res = validator.validateDependencies();
+    assert.strictEqual(res.pass, true);
+    assert.strictEqual(res.errors.length, 0);
+  });
+
+  await t.test('should detect dependency cycle in skills', (subT) => {
+    const validator = new Validator();
+
+    subT.mock.method(fs, 'existsSync', (p) => {
+      if (p.includes('02_SKILLS')) return true;
+      if (p.includes('dependencies.yaml')) return true;
+      return false;
+    });
+
+    subT.mock.method(fs, 'statSync', () => {
+      return { isDirectory: () => true };
+    });
+
+    subT.mock.method(fs, 'readdirSync', (p) => {
+      if (p.includes('02_SKILLS')) {
+        return ['skillA', 'skillB'];
+      }
+      return [];
+    });
+
+    subT.mock.method(fs, 'readFileSync', (p) => {
+      if (p.includes('skillA') && p.includes('dependencies.yaml')) {
+        return 'dependencies:\n  - skillB';
+      }
+      if (p.includes('skillB') && p.includes('dependencies.yaml')) {
+        return 'dependencies:\n  - skillA';
+      }
+      return '';
+    });
+
+    const res = validator.validateDependencies();
+    assert.strictEqual(res.pass, false);
+    assert.ok(res.errors.some(err => err.includes('Dependency Cycle detected')));
+  });
+
+  await t.test('should detect architecture boundary violations', (subT) => {
+    const validator = new Validator();
+
+    subT.mock.method(fs, 'existsSync', (p) => {
+      if (p.includes('02_SKILLS')) return false;
+      return true;
+    });
+
+    subT.mock.method(fs, 'statSync', (p) => {
+      const isDir = !p.endsWith('.js');
+      return { isDirectory: () => isDir };
+    });
+
+    subT.mock.method(fs, 'readdirSync', (p) => {
+      const relative = path.relative(path.resolve(__dirname, '../..'), p);
+      if (relative === '') {
+        return ['12_SYSTEM_LOGS'];
+      }
+      if (relative === '12_SYSTEM_LOGS') {
+        return ['some_logger.js'];
+      }
+      return [];
+    });
+
+    subT.mock.method(fs, 'readFileSync', (p) => {
+      if (p.endsWith('some_logger.js')) {
+        // Lower tier (12_SYSTEM_LOGS is Tier 4) requiring higher tier (08_VALIDATION is Tier 3)
+        return 'const val = require("../08_VALIDATION/some_validator.js");';
+      }
+      return '';
+    });
+
+    const res = validator.validateDependencies();
+    assert.strictEqual(res.pass, false);
+    assert.ok(res.errors.some(err => err.includes('Architecture Boundary Violation')));
+  });
+});
