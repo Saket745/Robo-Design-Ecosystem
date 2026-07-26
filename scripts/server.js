@@ -80,6 +80,32 @@ function parseJsonBody(req) {
   });
 }
 
+/**
+ * Generates mock validation data for a given pipeline phase based on current state.
+ * @param {string} phase
+ * @param {object} state
+ * @returns {object}
+ */
+function getTestDataForPhase(phase, state = {}) {
+  const testData = { trace_id: 'pipeline_run' };
+
+  if (phase === 'CAD') {
+    testData.dimensions = state.mobility || 'Legged';
+    testData.weight_kg = 5.2; // Under the 10kg limit
+  } else if (phase === 'PCB') {
+    testData.voltage = 12; // Under 24V limit
+    testData.mcu = state.compute_system || 'ESP32';
+  } else if (phase === 'Validation') {
+    testData.motor_runaway_protection = true;
+    testData.max_cell_voltage = 4.2;
+    testData.min_cell_voltage = 3.1;
+    testData.max_temperature_c = 65;
+    testData.emergency_stop_implemented = true;
+  }
+
+  return testData;
+}
+
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
@@ -302,20 +328,7 @@ const server = http.createServer(async (req, res) => {
         executionLogs.push(`Starting task: ${phase}...`);
         
         // Mock data to feed into validation pipeline
-        let testData = { trace_id: 'pipeline_run' };
-        if (phase === 'CAD') {
-          testData.dimensions = state.mobility || 'Legged';
-          testData.weight_kg = 5.2; // Under the 10kg limit
-        } else if (phase === 'PCB') {
-          testData.voltage = 12; // Under 24V limit
-          testData.mcu = state.compute_system || 'ESP32';
-        } else if (phase === 'Validation') {
-          testData.motor_runaway_protection = true;
-          testData.max_cell_voltage = 4.2;
-          testData.min_cell_voltage = 3.1;
-          testData.max_temperature_c = 65;
-          testData.emergency_stop_implemented = true;
-        }
+        const testData = getTestDataForPhase(phase, state);
 
         const skillId = phaseToSkill[phase];
         let valResult = { passed: true, issues: [] };
@@ -490,5 +503,6 @@ if (require.main === module) {
 
 module.exports = {
   parseJsonBody,
+  getTestDataForPhase,
   server
 };
