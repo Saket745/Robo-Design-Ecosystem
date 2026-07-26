@@ -171,6 +171,16 @@ class Validator {
     const warnings = [];
 
     // 1. Dependency Cycle check for skills
+    this._detectSkillDependencyCycles(errors);
+
+    // 2. Architecture Boundary check for static require imports
+    this._checkArchitectureBoundaries(errors);
+
+    return { pass: errors.length === 0, errors, warnings };
+  }
+
+  // Detect dependency cycle for skills
+  _detectSkillDependencyCycles(errors) {
     const skillsBaseDir = path.resolve(root, '02_SKILLS/04_SKILL_DOMAINS/ROBOTICS_ENGINEERING');
     const skillsList = [];
     if (fs.existsSync(skillsBaseDir)) {
@@ -225,8 +235,10 @@ class Validator {
         }
       }
     }
+  }
 
-    // 2. Architecture Boundary check for static require imports
+  // Check architecture boundary for static require imports
+  _checkArchitectureBoundaries(errors) {
     const tierMap = this.archRules.tiers || {};
     const getFileTier = (filePath) => {
       const relative = path.relative(root, filePath);
@@ -274,8 +286,6 @@ class Validator {
     } catch (e) {
       errors.push(`Failed to perform static architecture boundary check: ${e.message}`);
     }
-
-    return { pass: errors.length === 0, errors, warnings };
   }
 
   // Custom static quality analysis for C++ files to ensure deterministic evaluation order
